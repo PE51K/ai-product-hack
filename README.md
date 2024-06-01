@@ -57,8 +57,8 @@ def get_source_links(product_info: ProductInfo) -> list[SourceLink]:
 Этап 1: Парсинг. Воможные выходные данные:
 1) Текст из HTML
 2) Текст из PDF на сайте
-3) * Текст из картинок на сайте
-4) * Текст из видео на сайте
+3) Текст из картинок на сайте?
+4) Текст из видео на сайте?
 
 Формат входных данных ([TypedDict usage](https://peps.python.org/pep-0589/)):
 ```python
@@ -124,16 +124,17 @@ current_product_texts_from_sources: list[TextInfoFromSource] = get_product_texts
 ```python
 from typing import TypedDict
 
-class SourceLink(TypedDict):
-    link: str
-    confidence_rate: float # от 0 до 1
+class TextInfoFromSource(TypedDict):
+    html_text: str
+    pdf_texts: Optional[list[str]] # Может быть несколько PDF на сайте (если реализуется)
+    source: SourceLink
 
 class NotebookCharacteristics(TypedDict):
     diagonal_size: float
     ...
     source: SourceLink
 
-def get_product_characteristics_from_sources(product_source_links: list[SourceLink]) -> list[NotebookCharacteristics]:
+def get_product_characteristics_from_sources(product_texts_from_sources: list[TextInfoFromSource]) -> list[NotebookCharacteristics]:
     ...
     return [notebook_characteristics_from_source_1, notebook_characteristics_from_source_2, ...]
 ```
