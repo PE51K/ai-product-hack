@@ -60,36 +60,49 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
     for source_link in product_source_links:
         # Extract the link from the current source
         link = source_link['link']
-        # Make an HTTP request to the specified link
-        response = requests.get(link)
-        # Create a BeautifulSoup object to parse the HTML content of the page
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Extract all text from the HTML, using newline as separator and stripping extra spaces
-        html_text = soup.get_text(separator="\n", strip=True)
-        
-        # Find and download PDFs
-        pdf_texts = [] # to store texts from PDF files
-        for a_tag in soup.find_all('a', href=True):
-            # Extract the href value from the <a> tag
-            href = a_tag['href']
-            # Check if the link ends with .pdf (i.e., it's a PDF file)
-            if href.lower().endswith('.pdf'):
-                # Form the complete URL for the PDF file
-                pdf_url = href if href.startswith('http') else link + href
-                # Download the PDF file and save it to the specified directory
-                pdf_path = download_file(pdf_url, 'downloads')
-                # Extract text from the downloaded PDF file
-                pdf_text = extract_text_from_pdf(pdf_path)
-                pdf_texts.append(pdf_text)
-        
-        # Create a dictionary with information about the HTML and PDF texts
-        text_info = TextInfoFromSource(
-            html_text=html_text,
-            pdf_texts=pdf_texts if pdf_texts else None,
-            source=source_link
-        )
-        results.append(text_info)
+
+        if link.lower().endswith('.pdf'):
+            # Handle link as a PDF directly
+            pdf_url = link
+            pdf_path = download_file(pdf_url, 'downloads')
+            pdf_text = extract_text_from_pdf(pdf_path)
+            text_info = TextInfoFromSource(
+              html_text=None,  # No HTML content for a direct PDF link
+              pdf_texts=[pdf_text],
+              source=source_link
+            )
+
+        else:
+            # Make an HTTP request to the specified link
+            response = requests.get(link)
+            # Create a BeautifulSoup object to parse the HTML content of the page
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extract all text from the HTML, using newline as separator and stripping extra spaces
+            html_text = soup.get_text(separator="\n", strip=True)
+            
+            # Find and download PDFs
+            pdf_texts = [] # to store texts from PDF files
+            for a_tag in soup.find_all('a', href=True):
+                # Extract the href value from the <a> tag
+                href = a_tag['href']
+                # Check if the link ends with .pdf (i.e., it's a PDF file)
+                if href.lower().endswith('.pdf'):
+                    # Form the complete URL for the PDF file
+                    pdf_url = href if href.startswith('http') else link + href
+                    # Download the PDF file and save it to the specified directory
+                    pdf_path = download_file(pdf_url, 'downloads')
+                    # Extract text from the downloaded PDF file
+                    pdf_text = extract_text_from_pdf(pdf_path)
+                    pdf_texts.append(pdf_text)
+            
+            # Create a dictionary with information about the HTML and PDF texts
+            text_info = TextInfoFromSource(
+                html_text=html_text,
+                pdf_texts=pdf_texts if pdf_texts else None,
+                source=source_link
+            )
+            results.append(text_info)
     
     return results
 
