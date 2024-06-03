@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
     # Пример использования функции
     product_source_links = [
-        # {"link": "https://consumer.huawei.com/kz/phones/y5p/specs/", "confidence_rate": 0.9},
+        {"link": "https://consumer.huawei.com/kz/phones/y5p/specs/", "confidence_rate": 0.9},
         # {"link": "https://static.digma.ru/data/download/manuals/EVE-14-C414-ID-1795672_manual_2022-08-03.pdf", "confidence_rate": 0.9},
         # {"link": "https://ru.msi.com/Monitor/MAG-274QRF-QD-E2", "confidence_rate": 0.8},
         {"link": "https://www.mi.com/ru/product/redmi-note-10t/specs", "confidence_rate": 0.8},
