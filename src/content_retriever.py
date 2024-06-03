@@ -43,10 +43,12 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         str: Извлеченный текст из PDF-файла.
     """
     if not os.path.exists(pdf_path):
-        raise FileNotFoundError(f"Файл PDF не найден: {pdf_path}")
+        print(f"Файл PDF не найден: {pdf_path}")
+        return None
 
     if not pdf_path.endswith(".pdf"):
-        raise ValueError(f"Неверный формат файла: {pdf_path}")
+        print(f"Неверный формат файла: {pdf_path}")
+        return None
 
     text = ""
     with open(pdf_path, 'rb') as file:
@@ -59,7 +61,8 @@ def extract_text_from_pdf(pdf_path: str) -> str:
             text += page.extract_text() + "\n"
 
     if not text:
-        raise ValueError(f"Из PDF-файла не удалось извлечь текст: {pdf_path}")
+        print(f"Из PDF-файла не удалось извлечь текст: {pdf_path}")
+        return None
 
     # Проверка, что текст не содержит только пробелы
     if re.search(r"[^\s]", text):
@@ -67,7 +70,8 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         print(f"Извлеченный текст:\n{text}")
         print(f"Длина текста: {len(text)} символов")
     else:
-        raise ValueError(f"В извлеченном тексте нет символов, кроме пробелов: {pdf_path}")
+        print(f"В извлеченном тексте нет символов, кроме пробелов: {pdf_path}")
+        return None
 
     return text
 
@@ -147,9 +151,14 @@ if __name__ == "__main__":
     # Пример использования функции
     product_source_links = [
         # {"link": "https://consumer.huawei.com/kz/phones/y5p/specs/", "confidence_rate": 0.9},
-        {"link": "https://static.digma.ru/data/download/manuals/EVE-14-C414-ID-1795672_manual_2022-08-03.pdf", "confidence_rate": 0.9},
-        # {"link": "https://example.org", "confidence_rate": 0.8}
+        # {"link": "https://static.digma.ru/data/download/manuals/EVE-14-C414-ID-1795672_manual_2022-08-03.pdf", "confidence_rate": 0.9},
+        # {"link": "https://ru.msi.com/Monitor/MAG-274QRF-QD-E2", "confidence_rate": 0.8},
+        {"link": "https://www.mi.com/ru/product/redmi-note-10t/specs", "confidence_rate": 0.8},
+        # {"link": "https://example.org", "confidence_rate": 0.8},
+        # {"link": "https://example.org", "confidence_rate": 0.8},
+        # {"link": "https://example.org", "confidence_rate": 0.8},
     ]
+
 
     texts = get_source_links(product_source_links)
 
@@ -158,7 +167,7 @@ if __name__ == "__main__":
     sys.stdout.reconfigure(encoding='utf-8')
     
     # print("test2")
-    # print(texts)
+    print(texts)
 
     # for text_info in texts:
     #     # print(text_info.pdf_texts)
@@ -185,21 +194,28 @@ if __name__ == "__main__":
 
         with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['link', 'confidence_rate', 'html_text', 'pdf_texts']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=";")
 
             # Write the header row
             writer.writeheader()
 
             for text_info in texts:
-                # Combine PDF texts into a single string if there are multiple
-                pdf_texts = "\n".join(text_info.get('pdf_texts', []))
+                # Обработка возможного отсутствия ключа 'pdf_texts'
+                pdf_texts = text_info.get('pdf_texts', [])  # Пустой список по умолчанию
+                if pdf_texts is None:
+                    pdf_texts = []  # Обеспечить наличие списка, даже если 'pdf_texts' отсутствует
+
+                # Объединение элементов 'pdf_texts' в строку с разделителем '\n'
+                pdf_texts_joined = ",".join(pdf_texts)
+
 
                 # Create a dictionary with the data to write
                 data = {
                   'link': text_info['source']['link'],
                   'confidence_rate': text_info['source']['confidence_rate'],
                   'html_text': text_info['html_text'],
-                  'pdf_texts': pdf_texts
+                  'pdf_texts': pdf_texts_joined
                 }
 
                 # Write the data row
