@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import os
 import PyPDF2
 import re
+import csv
 
 class SourceLink(TypedDict):
     link: str
@@ -143,83 +144,163 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
     
     return results
 
+def save_to_csv(texts, filename="extracted_texts.csv"):
+    """
+    Saves the list of TextInfoFromSource objects (`texts`) to a CSV file.
 
+    Args:
+      texts (List[TextInfoFromSource]): The list of text information objects to save.
+      filename (str, optional): The name of the CSV file to create. Defaults to "extracted_texts.csv".
+    """
+
+    # Check if the file exists
+    if os.path.exists(filename):
+        # Delete the existing file to overwrite it
+        os.remove(filename)
+
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ['link', 'confidence_rate', 'html_text', 'pdf_texts']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=";")
+
+        # Write the header row
+        writer.writeheader()
+
+        for text_info in texts:
+            # Обработка возможного отсутствия ключа 'pdf_texts'
+            pdf_texts = text_info.get('pdf_texts', [])  # Пустой список по умолчанию
+            if pdf_texts is None:
+                pdf_texts = []  # Обеспечить наличие списка, даже если 'pdf_texts' отсутствует
+
+            # Объединение элементов 'pdf_texts' в строку с разделителем '\n'
+            pdf_texts_joined = ",".join(pdf_texts)
+
+            # Create a dictionary with the data to write
+            data = {
+              'link': text_info['source']['link'],
+              'confidence_rate': text_info['source']['confidence_rate'],
+              'html_text': text_info['html_text'],
+              'pdf_texts': pdf_texts_joined
+            }
+
+            # Write the data row
+            writer.writerow(data)
+
+def read_links_from_csv(file_path: str) -> List[SourceLink]:
+    """
+    Reads links from a CSV file and returns them as a list of SourceLink objects.
+
+    Args:
+      file_path (str): The path to the CSV file.
+
+    Returns:
+      List[SourceLink]: A list of SourceLink objects.
+    """
+    links = []
+    with open(file_path, 'r', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile, delimiter=',')
+        for row in reader:
+            link = row['Ссылка на сайт поставщика/вендора']
+            confidence_rate = 1.0  # Default confidence rate
+            links.append(SourceLink(link=link, confidence_rate=confidence_rate))
+    return links
 
 if __name__ == "__main__":
-    print("test")
+    # print("test")
 
-    # Пример использования функции
-    product_source_links = [
-        {"link": "https://consumer.huawei.com/kz/phones/y5p/specs/", "confidence_rate": 0.9},
-        # {"link": "https://static.digma.ru/data/download/manuals/EVE-14-C414-ID-1795672_manual_2022-08-03.pdf", "confidence_rate": 0.9},
-        # {"link": "https://ru.msi.com/Monitor/MAG-274QRF-QD-E2", "confidence_rate": 0.8},
-        {"link": "https://www.mi.com/ru/product/redmi-note-10t/specs", "confidence_rate": 0.8},
-        # {"link": "https://example.org", "confidence_rate": 0.8},
-        # {"link": "https://example.org", "confidence_rate": 0.8},
-        # {"link": "https://example.org", "confidence_rate": 0.8},
-    ]
+    # # Пример использования функции
+    # product_source_links = [
+    #     {"link": "https://consumer.huawei.com/kz/phones/y5p/specs/", "confidence_rate": 0.9},
+    #     # {"link": "https://static.digma.ru/data/download/manuals/EVE-14-C414-ID-1795672_manual_2022-08-03.pdf", "confidence_rate": 0.9},
+    #     # {"link": "https://ru.msi.com/Monitor/MAG-274QRF-QD-E2", "confidence_rate": 0.8},
+    #     {"link": "https://www.mi.com/ru/product/redmi-note-10t/specs", "confidence_rate": 0.8},
+    #     # {"link": "https://example.org", "confidence_rate": 0.8},
+    #     # {"link": "https://example.org", "confidence_rate": 0.8},
+    #     # {"link": "https://example.org", "confidence_rate": 0.8},
+    # ]
 
 
-    texts = get_source_links(product_source_links)
+    # texts = get_source_links(product_source_links)
 
-    import sys
-    # Изменение кодировки стандартного вывода на utf-8
-    sys.stdout.reconfigure(encoding='utf-8')
+    # import sys
+    # # Изменение кодировки стандартного вывода на utf-8
+    # sys.stdout.reconfigure(encoding='utf-8')
     
-    # print("test2")
-    print(texts)
+    # # print("test2")
+    # print(texts)
 
-    # for text_info in texts:
-    #     # print(text_info.pdf_texts)
-    #     print("------------------")
-    #     if text_info["pdf_texts"]:
-    #         for pdf_text in text_info["pdf_texts"]:
-    #             print(pdf_text)
+    # # for text_info in texts:
+    # #     # print(text_info.pdf_texts)
+    # #     print("------------------")
+    # #     if text_info["pdf_texts"]:
+    # #         for pdf_text in text_info["pdf_texts"]:
+    # #             print(pdf_text)
 
-    import csv
+    
 
-    def save_to_csv(texts, filename="extracted_texts.csv"):
-        """
-        Saves the list of TextInfoFromSource objects (`texts`) to a CSV file.
+    # def save_to_csv(texts, filename="extracted_texts.csv"):
+    #     """
+    #     Saves the list of TextInfoFromSource objects (`texts`) to a CSV file.
 
-        Args:
-          texts (List[TextInfoFromSource]): The list of text information objects to save.
-          filename (str, optional): The name of the CSV file to create. Defaults to "extracted_texts.csv".
-        """
+    #     Args:
+    #       texts (List[TextInfoFromSource]): The list of text information objects to save.
+    #       filename (str, optional): The name of the CSV file to create. Defaults to "extracted_texts.csv".
+    #     """
 
-        # Check if the file exists
-        if os.path.exists(filename):
-            # Delete the existing file to overwrite it
-            os.remove(filename)
+    #     # Check if the file exists
+    #     if os.path.exists(filename):
+    #         # Delete the existing file to overwrite it
+    #         os.remove(filename)
 
-        with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['link', 'confidence_rate', 'html_text', 'pdf_texts']
-            # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=";")
+    #     with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
+    #         fieldnames = ['link', 'confidence_rate', 'html_text', 'pdf_texts']
+    #         # writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=";")
 
-            # Write the header row
-            writer.writeheader()
+    #         # Write the header row
+    #         writer.writeheader()
 
-            for text_info in texts:
-                # Обработка возможного отсутствия ключа 'pdf_texts'
-                pdf_texts = text_info.get('pdf_texts', [])  # Пустой список по умолчанию
-                if pdf_texts is None:
-                    pdf_texts = []  # Обеспечить наличие списка, даже если 'pdf_texts' отсутствует
+    #         for text_info in texts:
+    #             # Обработка возможного отсутствия ключа 'pdf_texts'
+    #             pdf_texts = text_info.get('pdf_texts', [])  # Пустой список по умолчанию
+    #             if pdf_texts is None:
+    #                 pdf_texts = []  # Обеспечить наличие списка, даже если 'pdf_texts' отсутствует
 
-                # Объединение элементов 'pdf_texts' в строку с разделителем '\n'
-                pdf_texts_joined = ",".join(pdf_texts)
+    #             # Объединение элементов 'pdf_texts' в строку с разделителем '\n'
+    #             pdf_texts_joined = ",".join(pdf_texts)
 
 
-                # Create a dictionary with the data to write
-                data = {
-                  'link': text_info['source']['link'],
-                  'confidence_rate': text_info['source']['confidence_rate'],
-                  'html_text': text_info['html_text'],
-                  'pdf_texts': pdf_texts_joined
-                }
+    #             # Create a dictionary with the data to write
+    #             data = {
+    #               'link': text_info['source']['link'],
+    #               'confidence_rate': text_info['source']['confidence_rate'],
+    #               'html_text': text_info['html_text'],
+    #               'pdf_texts': pdf_texts_joined
+    #             }
 
-                # Write the data row
-                writer.writerow(data)
+    #             # Write the data row
+    #             writer.writerow(data)
 
-    # Example usage (assuming `texts` is already populated)
+    # # Example usage (assuming `texts` is already populated)
+    # save_to_csv(texts)
+
+
+
+
+    input_csv_path = "Links_cleaned.csv"
+    product_source_links = read_links_from_csv(input_csv_path)
+    texts = get_source_links(product_source_links)
     save_to_csv(texts)
+    print("Finished processing and saving extracted texts to CSV.")
+    
+    # def read_sixth_column(file_path: str):
+    #     with open(file_path, 'r', encoding='utf-8') as csvfile:
+    #         reader = csv.reader(csvfile, delimiter=',')
+    #         next(reader)  # Пропускаем заголовок
+    #         for row in reader:
+    #             if len(row) >= 6:  # Проверяем, что в строке есть как минимум 6 колонок
+    #                 print(row[5])  # Индексация начинается с 0, поэтому 6-я колонка имеет индекс 5
+    #             else:
+    #                 print("Row does not have 6 columns:", row)
+
+    # input_csv_path = "Links_cleaned.csv"  # Замените на путь к вашему файлу
+    # read_sixth_column(input_csv_path)
