@@ -98,7 +98,6 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
     for source_link in product_source_links:
         # Extract the link from the current source
         link = source_link['link']
-
         if link.lower().endswith('.pdf'):
             # Handle link as a PDF directly
             pdf_url = link
@@ -171,8 +170,11 @@ def save_to_csv(texts, filename="extracted_texts.csv"):
             if pdf_texts is None:
                 pdf_texts = []  # Обеспечить наличие списка, даже если 'pdf_texts' отсутствует
 
-            # Объединение элементов 'pdf_texts' в строку с разделителем '\n'
-            pdf_texts_joined = ",".join(pdf_texts)
+            # # Объединение элементов 'pdf_texts' в строку с разделителем '\n'
+            # pdf_texts_joined = ",".join(pdf_texts)
+
+            default_text = "Текст не извлечен"
+            pdf_texts_joined = ",".join([text or default_text for text in pdf_texts])
 
             # Create a dictionary with the data to write
             data = {
@@ -185,12 +187,33 @@ def save_to_csv(texts, filename="extracted_texts.csv"):
             # Write the data row
             writer.writerow(data)
 
-def read_links_from_csv(file_path: str) -> List[SourceLink]:
+# def read_links_from_csv(file_path: str) -> List[SourceLink]:
+#     """
+#     Reads links from a CSV file and returns them as a list of SourceLink objects.
+
+#     Args:
+#       file_path (str): The path to the CSV file.
+
+#     Returns:
+#       List[SourceLink]: A list of SourceLink objects.
+#     """
+#     links = []
+#     with open(file_path, 'r', encoding='utf-8') as csvfile:
+#         reader = csv.DictReader(csvfile, delimiter=',')
+#         for row in reader:
+#             link = row['Ссылка на сайт поставщика/вендора']
+#             confidence_rate = 1.0  # Default confidence rate
+#             links.append(SourceLink(link=link, confidence_rate=confidence_rate))
+#     return links
+
+
+def read_links_from_csv(file_path: str, max_rows: int = None) -> List[SourceLink]:
     """
     Reads links from a CSV file and returns them as a list of SourceLink objects.
 
     Args:
       file_path (str): The path to the CSV file.
+      max_rows (int, optional): The maximum number of rows to read. Defaults to None (read all rows).
 
     Returns:
       List[SourceLink]: A list of SourceLink objects.
@@ -198,7 +221,9 @@ def read_links_from_csv(file_path: str) -> List[SourceLink]:
     links = []
     with open(file_path, 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile, delimiter=',')
-        for row in reader:
+        for i, row in enumerate(reader):
+            if max_rows is not None and i >= max_rows:
+                break
             link = row['Ссылка на сайт поставщика/вендора']
             confidence_rate = 1.0  # Default confidence rate
             links.append(SourceLink(link=link, confidence_rate=confidence_rate))
@@ -287,20 +312,9 @@ if __name__ == "__main__":
 
 
     input_csv_path = "Links_cleaned.csv"
-    product_source_links = read_links_from_csv(input_csv_path)
+    # product_source_links = read_links_from_csv(input_csv_path)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=30)
     texts = get_source_links(product_source_links)
     save_to_csv(texts)
     print("Finished processing and saving extracted texts to CSV.")
     
-    # def read_sixth_column(file_path: str):
-    #     with open(file_path, 'r', encoding='utf-8') as csvfile:
-    #         reader = csv.reader(csvfile, delimiter=',')
-    #         next(reader)  # Пропускаем заголовок
-    #         for row in reader:
-    #             if len(row) >= 6:  # Проверяем, что в строке есть как минимум 6 колонок
-    #                 print(row[5])  # Индексация начинается с 0, поэтому 6-я колонка имеет индекс 5
-    #             else:
-    #                 print("Row does not have 6 columns:", row)
-
-    # input_csv_path = "Links_cleaned.csv"  # Замените на путь к вашему файлу
-    # read_sixth_column(input_csv_path)
