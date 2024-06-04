@@ -5,6 +5,7 @@ import os
 import PyPDF2
 import re
 import csv
+from urllib3.exceptions import SSLError  # Импортируем SSLError
 
 class SourceLink(TypedDict):
     link: str
@@ -21,10 +22,15 @@ def download_file(url: str, dest_folder: str, timeout: int = 10) -> str:
         os.makedirs(dest_folder)
 
     try:
-        response = requests.get(url, timeout=timeout)
+        response = requests.get(url, timeout=timeout, verify=False)
         response.raise_for_status()  # Raise an exception for unsuccessful download
     except requests.exceptions.RequestException as e:
         print(f"Error downloading file: {e}")
+        return None
+        if isinstance(e, SSLError):  # Проверка на ошибку сертификата
+            print(f"Error downloading file: {e} (SSL certificate issue)")
+        else:
+            print(f"Error downloading file: {e}")
         return None
     
     filename = os.path.join(dest_folder, url.split('/')[-1])
@@ -94,51 +100,67 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
               - source (SourceLink): The original source link information.
     """
     results = []
+
+    total_links = len(product_source_links)
+    processed_links = 0
     
     for source_link in product_source_links:
+        processed_links += 1
+        print(f"Обработано: {processed_links}/{total_links}", end="\r")
         # Extract the link from the current source
         link = source_link['link']
-        if link.lower().endswith('.pdf'):
-            # Handle link as a PDF directly
-            pdf_url = link
-            pdf_path = download_file(pdf_url, 'downloads', 30)
-            pdf_text = extract_text_from_pdf(pdf_path)
-            text_info = TextInfoFromSource(
-              html_text=None,  # No HTML content for a direct PDF link
-              pdf_texts=[pdf_text],
-              source=source_link
-            )
 
-        else:
-            # Make an HTTP request to the specified link
-            response = requests.get(link)
-            # Create a BeautifulSoup object to parse the HTML content of the page
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Extract all text from the HTML, using newline as separator and stripping extra spaces
-            html_text = soup.get_text(separator="\n", strip=True)
-            
-            # Find and download PDFs
-            pdf_texts = [] # to store texts from PDF files
-            for a_tag in soup.find_all('a', href=True):
-                # Extract the href value from the <a> tag
-                href = a_tag['href']
-                # Check if the link ends with .pdf (i.e., it's a PDF file)
-                if href.lower().endswith('.pdf'):
-                    # Form the complete URL for the PDF file
-                    pdf_url = href if href.startswith('http') else link + href
-                    # Download the PDF file and save it to the specified directory
-                    pdf_path = download_file(pdf_url, 'downloads', 30)
-                    # Extract text from the downloaded PDF file
-                    pdf_text = extract_text_from_pdf(pdf_path)
-                    pdf_texts.append(pdf_text)
-            
-            # Create a dictionary with information about the HTML and PDF texts
+        try:
+            if link.lower().endswith('.pdf'):
+                # Handle link as a PDF directly
+                pdf_url = link
+                pdf_path = download_file(pdf_url, 'downloads', 30)
+                pdf_text = extract_text_from_pdf(pdf_path)
+                text_info = TextInfoFromSource(
+                  html_text=None,  # No HTML content for a direct PDF link
+                  pdf_texts=[pdf_text],
+                  source=source_link
+                )
+
+            else:
+                # Make an HTTP request to the specified link
+                response = requests.get(link)
+                # Create a BeautifulSoup object to parse the HTML content of the page
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                # Extract all text from the HTML, using newline as separator and stripping extra spaces
+                html_text = soup.get_text(separator="\n", strip=True)
+                
+                # Find and download PDFs
+                pdf_texts = [] # to store texts from PDF files
+                for a_tag in soup.find_all('a', href=True):
+                    # Extract the href value from the <a> tag
+                    href = a_tag['href']
+                    # Check if the link ends with .pdf (i.e., it's a PDF file)
+                    if href.lower().endswith('.pdf'):
+                        # Form the complete URL for the PDF file
+                        pdf_url = href if href.startswith('http') else link + href
+                        # Download the PDF file and save it to the specified directory
+                        pdf_path = download_file(pdf_url, 'downloads', 30)
+                        # Extract text from the downloaded PDF file
+                        pdf_text = extract_text_from_pdf(pdf_path)
+                        pdf_texts.append(pdf_text)
+                
+                # Create a dictionary with information about the HTML and PDF texts
+                text_info = TextInfoFromSource(
+                    html_text=html_text,
+                    pdf_texts=pdf_texts if pdf_texts else None,
+                    source=source_link
+                )
+        except requests.exceptions.RequestException as e:
+            print(f"Error downloading content from {link}: {e}")
+            # Создать пустой объект TextInfoFromSource с сообщением об ошибке
             text_info = TextInfoFromSource(
-                html_text=html_text,
-                pdf_texts=pdf_texts if pdf_texts else None,
+                html_text=f"Error downloading content: {e}",
+                pdf_texts=None,
                 source=source_link
             )
+
         results.append(text_info)
     
     return results
@@ -186,25 +208,6 @@ def save_to_csv(texts, filename="extracted_texts.csv"):
 
             # Write the data row
             writer.writerow(data)
-
-# def read_links_from_csv(file_path: str) -> List[SourceLink]:
-#     """
-#     Reads links from a CSV file and returns them as a list of SourceLink objects.
-
-#     Args:
-#       file_path (str): The path to the CSV file.
-
-#     Returns:
-#       List[SourceLink]: A list of SourceLink objects.
-#     """
-#     links = []
-#     with open(file_path, 'r', encoding='utf-8') as csvfile:
-#         reader = csv.DictReader(csvfile, delimiter=',')
-#         for row in reader:
-#             link = row['Ссылка на сайт поставщика/вендора']
-#             confidence_rate = 1.0  # Default confidence rate
-#             links.append(SourceLink(link=link, confidence_rate=confidence_rate))
-#     return links
 
 
 def read_links_from_csv(file_path: str, max_rows: int = None) -> List[SourceLink]:
@@ -313,7 +316,7 @@ if __name__ == "__main__":
 
     input_csv_path = "Links_cleaned.csv"
     # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=30)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=1000)
     texts = get_source_links(product_source_links)
     save_to_csv(texts)
     print("Finished processing and saving extracted texts to CSV.")
