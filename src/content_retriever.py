@@ -222,7 +222,16 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
             
             # Extract all text from the HTML, using newline as separator and stripping extra spaces
             html_text = soup.get_text(separator="\n", strip=True)
-            
+
+
+            for a_tag in soup.find_all('a', href=True):
+                # Extract the href value from the <a> tag
+                href = a_tag['href']
+                # Check if the link ends with .pdf (i.e., it's a PDF file)
+                if href.lower().endswith('.pdf'):
+                    print(href)
+
+
             # Find and download PDFs
             pdf_texts = [] # to store texts from PDF files
             for a_tag in soup.find_all('a', href=True):
@@ -338,7 +347,8 @@ def save_to_json(texts, filename="extracted_texts.json"):
       texts = []
 
     # Преобразовать список TextInfoFromSource в список словарей
-    json_data = [text_info.__dict__ for text_info in texts]
+    # json_data = [text_info.__dict__ for text_info in texts]
+    json_data = [text_info for text_info in text_info_from_sources]
 
     # Сохранить данные в JSON файл
     with open(filename, 'w', encoding='utf-8') as outfile:
@@ -353,12 +363,13 @@ if __name__ == "__main__":
 
     input_csv_path = "Links_cleaned.csv"
     # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=2)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=100)
 
 
     # texts = get_source_links(product_source_links)
     # save_to_csv(texts)
     # print("Finished processing and saving extracted texts to CSV.")
+
 
 
     import concurrent.futures
@@ -373,5 +384,8 @@ if __name__ == "__main__":
         if result is not None:
             text_info_from_sources.append(result)
     
-    save_to_csv(text_info_from_sources)
-    print("Finished processing and saving extracted texts to CSV.")
+    # save_to_csv(text_info_from_sources)
+    # print("Finished processing and saving extracted texts to CSV.")
+
+    save_to_json(text_info_from_sources)
+    print("Finished processing and saving extracted texts to JSON.")
