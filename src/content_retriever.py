@@ -3,10 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 import os
 import PyPDF2
+from PyPDF2 import errors
 import re
 import csv
 from urllib3.exceptions import SSLError  # Импортируем SSLError
 from pathlib import Path
+from functools import lru_cache
 
 class SourceLink(TypedDict):
     link: str
@@ -19,6 +21,7 @@ class TextInfoFromSource(TypedDict):
 
 def download_file(url: str, dest_folder: str, timeout: int = 10) -> str:
     """Downloads a file from URL to the given folder."""
+
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
@@ -48,11 +51,17 @@ def download_file(url: str, dest_folder: str, timeout: int = 10) -> str:
     
     filename = os.path.join(dest_folder, url.split('/')[-1])
 
-    with open(filename, 'wb') as file:
-        file.write(response.content)
+    try:
+        with open(filename, 'wb') as file:
+            file.write(response.content)
+    except OSError as e:
+        # Обработка ошибки
+        print(f"Ошибка загрузки файла: {e}")
+        return None
     
     return filename
 
+@lru_cache()
 def extract_text_from_pdf(pdf_path: str) -> str:
     """
     Extracts text content from a PDF file at the given path.
@@ -78,7 +87,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     with open(pdf_path, 'rb') as file:
         try:
             reader = PyPDF2.PdfReader(file)
-        except PyPDF2.utils.PdfReadError:
+        except PyPDF2.errors.PdfReadError:
             # raise ValueError(f"Не удалось открыть PDF-файл: {pdf_path}")
             print(f"Не удалось открыть PDF-файл: {pdf_path}")
             return None
@@ -135,7 +144,7 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
             if link.lower().endswith('.pdf'):
                 # Handle link as a PDF directly
                 pdf_url = link
-                pdf_path = download_file(pdf_url, 'downloads', 30)
+                pdf_path = download_file(pdf_url, 'downloads', 60)
                 pdf_text = extract_text_from_pdf(pdf_path)
                 text_info = TextInfoFromSource(
                   html_text=None,  # No HTML content for a direct PDF link
@@ -162,7 +171,7 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
                         # Form the complete URL for the PDF file
                         pdf_url = href if href.startswith('http') else link + href
                         # Download the PDF file and save it to the specified directory
-                        pdf_path = download_file(pdf_url, 'downloads', 30)
+                        pdf_path = download_file(pdf_url, 'downloads', 60)
                         # Extract text from the downloaded PDF file
                         pdf_text = extract_text_from_pdf(pdf_path)
                         pdf_texts.append(pdf_text)
@@ -196,7 +205,7 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
         if link.lower().endswith('.pdf'):
             # Handle link as a PDF directly
             pdf_url = link
-            pdf_path = download_file(pdf_url, 'downloads', 30)
+            pdf_path = download_file(pdf_url, 'downloads', 60)
             pdf_text = extract_text_from_pdf(pdf_path)
             text_info = TextInfoFromSource(
               html_text=None,  # No HTML content for a direct PDF link
@@ -223,7 +232,7 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
                     # Form the complete URL for the PDF file
                     pdf_url = href if href.startswith('http') else link + href
                     # Download the PDF file and save it to the specified directory
-                    pdf_path = download_file(pdf_url, 'downloads', 30)
+                    pdf_path = download_file(pdf_url, 'downloads', 60)
                     # Extract text from the downloaded PDF file
                     pdf_text = extract_text_from_pdf(pdf_path)
                     pdf_texts.append(pdf_text)
@@ -320,7 +329,7 @@ if __name__ == "__main__":
 
     input_csv_path = "Links_cleaned.csv"
     # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=2000)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=500)
 
 
     # texts = get_source_links(product_source_links)
@@ -331,7 +340,7 @@ if __name__ == "__main__":
     import concurrent.futures
 
     # Use ThreadPoolExecutor for multithreaded processing
-    with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
         results = executor.map(get_source_links_single, product_source_links)
 
     # Process the results
