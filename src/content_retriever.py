@@ -10,6 +10,7 @@ from urllib3.exceptions import SSLError  # Импортируем SSLError
 from pathlib import Path
 from functools import lru_cache
 import json
+from urllib.parse import urljoin
 
 class SourceLink(TypedDict):
     link: str
@@ -91,6 +92,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         except PyPDF2.errors.PdfReadError:
             # raise ValueError(f"Не удалось открыть PDF-файл: {pdf_path}")
             print(f"Не удалось открыть PDF-файл: {pdf_path}")
+            return None
+        except PyPDF2.errors.DependencyError:
+            # raise ValueError(f"Не удалось открыть PDF-файл: {pdf_path}")
+            print(f"Не удалось открыть/обработать PDF-файл: {pdf_path}")
             return None
 
         for page_num in range(len(reader.pages)):
@@ -239,8 +244,14 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
                 href = a_tag['href']
                 # Check if the link ends with .pdf (i.e., it's a PDF file)
                 if href.lower().endswith('.pdf'):
+
                     # Form the complete URL for the PDF file
-                    pdf_url = href if href.startswith('http') else link + href
+                    pdf_url = href if href.startswith('http') else urljoin(link, href)
+
+                    # if not href.startswith('http'):
+                    #     pdf_url = urljoin(link, href)
+
+
                     # Download the PDF file and save it to the specified directory
                     pdf_path = download_file(pdf_url, 'downloads', 60)
                     # Extract text from the downloaded PDF file
@@ -363,7 +374,7 @@ if __name__ == "__main__":
 
     input_csv_path = "Links_cleaned.csv"
     # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=100)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=200)
 
 
     # texts = get_source_links(product_source_links)
