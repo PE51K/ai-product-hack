@@ -25,8 +25,6 @@ def download_file(url: str, dest_folder: str, timeout: int = 10) -> str:
         response = requests.get(url, timeout=timeout, verify=False)
         response.raise_for_status()  # Raise an exception for unsuccessful download
     except requests.exceptions.RequestException as e:
-        print(f"Error downloading file: {e}")
-        return None
         if isinstance(e, SSLError):  # Проверка на ошибку сертификата
             print(f"Error downloading file: {e} (SSL certificate issue)")
         else:
@@ -49,6 +47,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     Returns:
         str: Извлеченный текст из PDF-файла.
     """
+    if pdf_path is None:
+        print("Не указан путь к PDF-файлу")
+        return None
+
     if not os.path.exists(pdf_path):
         print(f"Файл PDF не найден: {pdf_path}")
         return None
@@ -62,7 +64,10 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         try:
             reader = PyPDF2.PdfReader(file)
         except PyPDF2.utils.PdfReadError:
-            raise ValueError(f"Не удалось открыть PDF-файл: {pdf_path}")
+            # raise ValueError(f"Не удалось открыть PDF-файл: {pdf_path}")
+            print(f"Не удалось открыть PDF-файл: {pdf_path}")
+            return None
+
         for page_num in range(len(reader.pages)):
             page = reader.pages[page_num]
             text += page.extract_text() + "\n"
@@ -109,6 +114,7 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
         print(f"Обработано: {processed_links}/{total_links}", end="\r")
         # Extract the link from the current source
         link = source_link['link']
+        print(link)
 
         try:
             if link.lower().endswith('.pdf'):
