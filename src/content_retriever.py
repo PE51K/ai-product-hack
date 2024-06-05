@@ -9,6 +9,7 @@ import csv
 from urllib3.exceptions import SSLError  # Импортируем SSLError
 from pathlib import Path
 from functools import lru_cache
+import json
 
 class SourceLink(TypedDict):
     link: str
@@ -323,13 +324,36 @@ def read_links_from_csv(file_path: str, max_rows: int = None) -> List[SourceLink
             links.append(SourceLink(link=link, confidence_rate=confidence_rate))
     return links
 
+def save_to_json(texts, filename="extracted_texts.json"):
+    """
+    Saves the list of TextInfoFromSource objects (`texts`) to a JSON file.
+
+    Args:
+    texts (List[TextInfoFromSource]): The list of text information objects to save.
+    filename (str, optional): The name of the JSON file to create. Defaults to "extracted_texts.json".
+    """
+
+    # Обработать случай пустого списка texts (во избежание ошибки сериализации JSON)
+    if not texts:
+      texts = []
+
+    # Преобразовать список TextInfoFromSource в список словарей
+    json_data = [text_info.__dict__ for text_info in texts]
+
+    # Сохранить данные в JSON файл
+    with open(filename, 'w', encoding='utf-8') as outfile:
+        json.dump(json_data, outfile, indent=4)  # Параметр indent для форматирования
+
+    print(f"Данные успешно сохранены в файл: {filename}")
+
+
 if __name__ == "__main__":
     # print("test")
 
 
     input_csv_path = "Links_cleaned.csv"
     # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=500)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=2)
 
 
     # texts = get_source_links(product_source_links)
