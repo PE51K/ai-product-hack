@@ -6,6 +6,7 @@ import PyPDF2
 import re
 import csv
 from urllib3.exceptions import SSLError  # Импортируем SSLError
+from pathlib import Path
 
 class SourceLink(TypedDict):
     link: str
@@ -21,14 +22,28 @@ def download_file(url: str, dest_folder: str, timeout: int = 10) -> str:
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
+    filename = url.split("/")[-1]  # Извлечь имя файла из URL-адреса
+    file_path = os.path.join(dest_folder, url.split('/')[-1])
+
+    # Проверить, существует ли файл в папке назначения
+    if os.path.exists(file_path):
+        print(f"Файл '{filename}' уже существует, пропускаем загрузку.")
+        return file_path
+
     try:
-        response = requests.get(url, timeout=timeout, verify=False)
+        # response = requests.get(url, timeout=timeout, verify=False)
+        response = requests.get(url, stream=True, timeout=timeout, verify=False)
         response.raise_for_status()  # Raise an exception for unsuccessful download
     except requests.exceptions.RequestException as e:
         if isinstance(e, SSLError):  # Проверка на ошибку сертификата
             print(f"Error downloading file: {e} (SSL certificate issue)")
         else:
             print(f"Error downloading file: {e}")
+        return None
+
+    # Проверка на пустой ответ
+    if not response.content:
+        print(f"Error downloading file: Empty response (URL: {url})")
         return None
     
     filename = os.path.join(dest_folder, url.split('/')[-1])
@@ -79,7 +94,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
     # Проверка, что текст не содержит только пробелы
     if re.search(r"[^\s]", text):
         # Вывод текста и его длины
-        print(f"Извлеченный текст:\n{text}")
+        # print(f"Извлеченный текст:\n{text}")
         print(f"Длина текста: {len(text)} символов")
     else:
         print(f"В извлеченном тексте нет символов, кроме пробелов: {pdf_path}")
@@ -322,7 +337,7 @@ if __name__ == "__main__":
 
     input_csv_path = "Links_cleaned.csv"
     # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=1000)
+    product_source_links = read_links_from_csv(input_csv_path, max_rows=50)
     texts = get_source_links(product_source_links)
     save_to_csv(texts)
     print("Finished processing and saving extracted texts to CSV.")
