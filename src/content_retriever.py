@@ -112,6 +112,7 @@ def extract_text_from_pdf(pdf_path: str) -> str:
         # print(f"Извлеченный текст:\n{text}")
         print(f"Длина текста: {len(text)} символов")
     else:
+        # TO DO Вероятно это картинка тогда нужно попробовать обработать картинку?
         print(f"В извлеченном тексте нет символов, кроме пробелов: {pdf_path}")
         return None
 
@@ -150,7 +151,7 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
             if link.lower().endswith('.pdf'):
                 # Handle link as a PDF directly
                 pdf_url = link
-                pdf_path = download_file(pdf_url, 'downloads', 60)
+                pdf_path = download_file(pdf_url, 'downloads', 120)
                 pdf_text = extract_text_from_pdf(pdf_path)
                 text_info = TextInfoFromSource(
                   html_text=None,  # No HTML content for a direct PDF link
@@ -177,7 +178,7 @@ def get_source_links(product_source_links: List[SourceLink]) -> List[TextInfoFro
                         # Form the complete URL for the PDF file
                         pdf_url = href if href.startswith('http') else link + href
                         # Download the PDF file and save it to the specified directory
-                        pdf_path = download_file(pdf_url, 'downloads', 60)
+                        pdf_path = download_file(pdf_url, 'downloads', 120)
                         # Extract text from the downloaded PDF file
                         pdf_text = extract_text_from_pdf(pdf_path)
                         pdf_texts.append(pdf_text)
@@ -373,8 +374,8 @@ if __name__ == "__main__":
 
 
     input_csv_path = "Links_cleaned.csv"
-    # product_source_links = read_links_from_csv(input_csv_path)
-    product_source_links = read_links_from_csv(input_csv_path, max_rows=200)
+    product_source_links = read_links_from_csv(input_csv_path)
+    # product_source_links = read_links_from_csv(input_csv_path, max_rows=1000)
 
 
     # texts = get_source_links(product_source_links)
@@ -386,7 +387,7 @@ if __name__ == "__main__":
     import concurrent.futures
 
     # Use ThreadPoolExecutor for multithreaded processing
-    with concurrent.futures.ThreadPoolExecutor(max_workers=1000) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2000) as executor:
         results = executor.map(get_source_links_single, product_source_links)
 
     # Process the results
