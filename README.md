@@ -22,7 +22,9 @@ pip install -r requirements.txt
 - [diffbot.com](https://www.diffbot.com/data/product)
 
 Готовые решения на русском:
-- ?
+- [cs-cart.alexbranding.com](https://cs-cart.alexbranding.com/ru/parsing.html)
+- [a-parser.com](https://a-parser.com/a-parser-for-e-commerce/)
+- [froxy.com](https://froxy.com/ru/e-commerce-scraper)
 
 ### Подробнее о подзадаче 1
 
