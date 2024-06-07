@@ -55,7 +55,7 @@ st.title("Визуализация ML-проекта")
 with st.form(key="data_input"):
     brand_name = st.text_input("Название бренда")
     model_name = st.text_input("Название модели")
-    part_number = st.number_input("Номер детали (опционально)")
+    part_number = st.number_input("Номер детали (опционально)", key="part_number", step=None)
     submit_button = st.form_submit_button("Запустить")
 
 # Раздел для отображения результатов
