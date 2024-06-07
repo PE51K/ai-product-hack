@@ -153,3 +153,80 @@ class FinalNotebookCharacteristics(TypedDict):
 
 def get_final_product_characteristics(product_characteristics_from_sources: List[Union[NotebookCharacteristics, TVCharacteristics, ...]]) -> Union(FinalNotebookCharacteristics, FinalTVCharacteristics, ...):
 ```
+
+
+## Функциональные возможности
+
+* ... (перечислить ключевые функции)
+* ... (описать примеры использования)
+
+### Установка
+
+1. ... (команды для установки)
+2. ... (инструкции)
+
+## Использование
+
+### Запуск приложения
+
+... (описание запуска)
+
+### Интерфейс пользователя
+
+... (краткий обзор интерфейса)
+
+### Пример использования
+
+... (пошаговый пример)
+
+## Структура
+
+**Модули:**
+
+* ``: Содержит функции для обработки данных, таких как загрузка, очистка и предобработка.
+* ``: Содержит функции для создания элементов интерфейса Streamlit.
+* ``: Содержит функции для реализации логики работы приложения, включая алгоритмы и модели машинного обучения.
+* `utils`: Содержит вспомогательные функции и конфигурации.
+
+**Классы:**
+
+* ``: Представляет объект для обработки данных.
+* ``: Представляет объект для создания интерфейса Streamlit.
+* ` `: Координирует работу модулей и компонентов приложения.
+
+**Архитектура:**
+
+**Документация API:**
+
+[Ссылка на документацию API](https://...)
+
+
+## Предварительная структура
+
+my_streamlit_app/
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── setup.py
+├── src/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── pages/
+│   │   ├── __init__.py
+│   │   ├── page1.py
+│   │   └── page2.py
+│   ├── components/
+│   │   ├── __init__.py
+│   │   └── custom_component.py
+│   ├── utils/
+│   │   ├── __init__.py
+│   │   └── helper_functions.py
+└── tests/
+    ├── __init__.py
+    └── test_app.py
+
+
+
+<details><summary><b> How to install and run the application</b></summary>
+
+ - `pip install -r requirements_streamlit-data-viz.txt` 
