@@ -17,8 +17,19 @@ pip install -r requirements.txt
 2) Парсинг текста с каждого выделенного источника
 3) Обработка полученного текста и выделение характеристик товара
 
+Готовые решения на английском:
+- [oxylabs.io](https://oxylabs.io/features/adaptive-parser)
+- [diffbot.com](https://www.diffbot.com/data/product)
+
+Готовые решения на русском:
+- ?
+
 
 ### Подробнее о подзадаче 1
+
+Полезные ссылки на источники:
+- [Дока API поиска Яндекс](https://yandex.cloud/ru/docs/search-api/)
+- [Дока YandexGPT Python](https://yandexgpt-python.readthedocs.io/en/latest/)
 
 Этап 1: получения ссылок на ресурсы. Воможные пути решения:
 1) Запрос к API поискового движка
@@ -53,6 +64,10 @@ def get_source_links(product_info: ProductInfo) -> list[SourceLink]:
 
 
 ### Подробнее о подзадаче 2
+
+Полезные ссылки на источники:
+- [Извлечение текста из PDF](https://habr.com/ru/companies/ruvds/articles/765246/)
+- [Теггинг HTML](https://medium.indix.com/attribute-level-parser-to-extract-product-information-from-html-6ff4e48ae36d)
 
 Этап 1: Парсинг. Воможные выходные данные:
 1) Текст из HTML
@@ -91,6 +106,9 @@ def get_product_texts_from_sources(product_source_links: list[SourceLink]) -> li
 
 
 ### Подробнее о подзадаче 3
+
+Полезные ссылки на источники:
+- [Дока YandexGPT Python](https://yandexgpt-python.readthedocs.io/en/latest/)
 
 Этап 1: извлечение конкретных характеристик из текста. Какие подходы можно применить:
 1) Языковая модель
