@@ -1,6 +1,17 @@
 import streamlit as st
 import json
 
+from types.product_info import ProductInfo
+from types.source_links import SearchResult, SourceLink
+from sources_search import search_and_rate
+
+
+product_info = ProductInfo(
+    brand_name="ACER",
+    model_name="CC715-91P-X7V8",
+    part_number="NX.C5FER.001"
+)
+
 # Функция-заглушка 
 def get_link_and_confidence_rate(brand_name, model_name, part_number):
     """
@@ -48,25 +59,30 @@ def generate_info_model(html_text, pdf_texts):
     }
     return json.dumps(info_model)
 
-# Разделение приложения на разделы с помощью заголовков
-st.title("Визуализация ML-проекта")
 
-# Раздел для ввода данных пользователем
-with st.form(key="data_input"):
-    brand_name = st.text_input("Название бренда")
-    model_name = st.text_input("Название модели")
-    part_number = st.text_input("Номер детали (опционально)")
-    submit_button = st.form_submit_button("Запустить")
+def main():
+    # Разделение приложения на разделы с помощью заголовков
+    st.title("Визуализация ML-проекта")
 
-# Раздел для отображения результатов
-with st.expander("Результаты"):
-    if submit_button:
-        link, confidence_rate = get_link_and_confidence_rate(brand_name, model_name, part_number)
-        html_text, pdf_texts = process_html_and_pdf(link)
-        info_model = generate_info_model(html_text, pdf_texts)
+    # Раздел для ввода данных пользователем
+    with st.form(key="data_input"):
+        brand_name = st.text_input("Название бренда")
+        model_name = st.text_input("Название модели")
+        part_number = st.text_input("Номер детали (опционально)")
+        submit_button = st.form_submit_button("Запустить")
 
-        st.write(f"Ссылка: {link}")
-        st.write(f"Уверенность: {confidence_rate:.2f}")
-        st.write(f"HTML-текст: {html_text}")
-        st.write(f"PDF-тексты: {pdf_texts}")
-        st.json(info_model)
+    # Раздел для отображения результатов
+    with st.expander("Результаты"):
+        if submit_button:
+            link, confidence_rate = get_link_and_confidence_rate(brand_name, model_name, part_number)
+            html_text, pdf_texts = process_html_and_pdf(link)
+            info_model = generate_info_model(html_text, pdf_texts)
+
+            st.write(f"Ссылка: {link}")
+            st.write(f"Уверенность: {confidence_rate:.2f}")
+            st.write(f"HTML-текст: {html_text}")
+            st.write(f"PDF-тексты: {pdf_texts}")
+            st.json(info_model)
+
+if __name__ == "__main__":
+    main()
