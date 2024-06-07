@@ -154,6 +154,26 @@ class FinalNotebookCharacteristics(TypedDict):
 def get_final_product_characteristics(product_characteristics_from_sources: List[Union[NotebookCharacteristics, TVCharacteristics, ...]]) -> Union(FinalNotebookCharacteristics, FinalTVCharacteristics, ...):
 ```
 
+#  "Название проекта ...."
+
+## Описание
+
+**Название проекта** - это ..., которое ... (описание функциональности).
+
+## Оглавление
+
+* [Введение](#введение)
+* [Функциональные возможности](#функциональные-возможности)
+* [Установка и настройка](#установка-и-настройка)
+* [Использование](#использование)
+* [Документация](#документация)
+* [Вклад](#вклад)
+* [Лицензия](#лицензия)
+* [Контакты](#контакты)
+
+## Введение
+
+... (мотивация, проблема, решение)
 
 ## Функциональные возможности
 
@@ -229,4 +249,25 @@ my_streamlit_app/
 
 <details><summary><b> How to install and run the application</b></summary>
 
- - `pip install -r requirements_streamlit-data-viz.txt` 
+1. Clone the repository:
+    ```
+    git clone https://github.com/
+    ```
+2. Navigate to the project directory:
+    ```
+    cd ai-product-hack
+    ```
+3. Install the dependencies:
+    ```
+    pip install -r requirements.txt
+    ```
+    or
+    ```
+    pip install -r requirements_streamlit-data-viz.txt
+    ```
+## Usage
+
+Run the application:
+```
+streamlit run src/main.py
+```
