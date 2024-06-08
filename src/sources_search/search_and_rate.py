@@ -5,7 +5,7 @@ from yandex_gpt import YandexGPT, YandexGPTConfigManagerForAPIKey
 
 from src.sources_search.search import fetch_search_results
 from src.sources_search.xml_parsing import parse_xml_response
-from src.types import ProductInfo, SourceLink, SearchResult
+from src.types_definition import ProductInfo, SourceLink, SearchResult
 
 
 async def process_message(sem, message, yandex_gpt):

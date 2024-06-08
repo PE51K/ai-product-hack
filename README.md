@@ -238,13 +238,16 @@ my_streamlit_app/
 │   ├── components/
 │   │   ├── __init__.py
 │   │   └── custom_component.py
+│   ├── types_definition/    
+│   │   ├── __init__.py           
+│   │   ├── product_info.py                                 
+│   │   └── source_link.py 
 │   ├── utils/
 │   │   ├── __init__.py
 │   │   └── helper_functions.py
 └── tests/
     ├── __init__.py
     └── test_app.py
-
 
 
 <details><summary><b> How to install and run the application</b></summary>
