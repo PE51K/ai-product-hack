@@ -1,9 +1,9 @@
 import streamlit as st
 import json
 
-from types.product_info import ProductInfo
-from types.source_links import SearchResult, SourceLink
-from sources_search import search_and_rate
+from types_definition.product_info import ProductInfo
+from types_definition.source_links import SearchResult, SourceLink
+# from sources_search import search_and_rate
 
 
 product_info = ProductInfo(
