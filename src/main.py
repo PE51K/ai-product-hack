@@ -2,7 +2,7 @@ import streamlit as st
 import json
 
 from types_definition.product_info import ProductInfo
-from types_definition.source_links import SearchResult, SourceLink
+from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
 # from sources_search import search_and_rate
 
 
@@ -12,10 +12,18 @@ product_info = ProductInfo(
     part_number="NX.C5FER.001"
 )
 
-# Функция-заглушка 
-def get_link_and_confidence_rate(brand_name, model_name, part_number):
+source_link = SourceLink(link="https://example.com", confidence_rate=0.8)
+
+text_info = TextInfoFromSource(
+    html_text="<p>This is some text from the source.</p>",
+    pdf_texts=["Text from PDF 1", "Text from PDF 2"],
+    source=source_link,
+)
+
+
+def search_and_rate(brand_name, model_name, part_number):
     """
-    Функция имитирует первый алгоритм, возвращая ссылку и показатель уверенности.
+    Функция имитирует первый алгоритм, возвращая объект SourceLink.
 
     Args:
         brand_name (str): Название бренда.
@@ -23,41 +31,67 @@ def get_link_and_confidence_rate(brand_name, model_name, part_number):
         part_number (int, optional): Номер детали.
 
     Returns:
-        tuple: Ссылка (str) и показатель уверенности (float).
+        SourceLink: Объект SourceLink с ссылкой и показателем уверенности.
     """
-    return "https://example.com", 0.8  # Пример
+    return SourceLink(link="https://example.com", confidence_rate=0.8) 
 
-# Функция-заглушка 
-def process_html_and_pdf(link):
+
+def get_source_links(source_link: SourceLink):
     """
-    Функция имитирует второй алгоритм, извлекая текст из HTML и PDF по ссылке.
+    Функция имитирует второй алгоритм, извлекая текст из HTML и PDF по ссылке из объекта SourceLink.
 
     Args:
-        link (str): Ссылка на источник.
+        source_link (SourceLink): Объект SourceLink с ссылкой.
 
     Returns:
-        tuple: Извлеченный текст HTML (str) и список текстов PDF (list[str]).
+        TextInfoFromSource: Объект TextInfoFromSource с извлеченным текстом.
     """
-    return "Извлеченный текст HTML", ["Текст из PDF 1", "Текст из PDF 2"]  # Пример
+    html_text = "Извлеченный текст HTML"
+    pdf_texts = ["Текст из PDF 1", "Текст из PDF 2"]
+    return TextInfoFromSource(html_text=html_text, pdf_texts=pdf_texts, source=source_link)
 
-# Функция-заглушка 
-def generate_info_model(html_text, pdf_texts):
+
+def generate_info_model(text_info: TextInfoFromSource):
     """
-    Функция имитирует третий алгоритм, генерируя JSON-инфомодель на основе текста.
+    Функция имитирует генерацию JSON-инфомодели продукта на основе извлеченного текста.
 
     Args:
-        html_text (str): Извлеченный текст HTML.
-        pdf_texts (list[str]): Список текстов PDF.
+        text_info (TextInfoFromSource): Объект TextInfoFromSource с извлеченным текстом.
 
     Returns:
         str: JSON-строка, представляющая инфомодель продукта.
     """
+    # html_text = text_info.html_text
+    # pdf_texts = text_info.pdf_texts
+
+    # # Извлечение информации из текста
+    # info_model = {}
+
+    # # Пример извлечения характеристик из HTML-текста
+    # for match in re.finditer(r"<p>(.*?)</p>", html_text):
+    #     text = match.group(1)
+    #     if ":" in text:
+    #         key, value = text.split(":")
+    #         info_model[key.strip()] = value.strip()
+
+    # # Пример извлечения характеристик из PDF-текстов
+    # for pdf_text in pdf_texts:
+    #     pass
+    #     # ... (Логика извлечения информации из pdf_text)
+    #     # ... (Обновление info_model)
+
+    # ... (Дополнительная логика извлечения информации)
+
     info_model = {
         "характеристика1": "значение1",
         "характеристика2": "значение2",
         # ...
     }
-    return json.dumps(info_model)
+
+    # Преобразование info_model в JSON
+    json_model = json.dumps(info_model, indent=4)
+
+    return json_model
 
 
 def main():
@@ -74,14 +108,14 @@ def main():
     # Раздел для отображения результатов
     with st.expander("Результаты"):
         if submit_button:
-            link, confidence_rate = get_link_and_confidence_rate(brand_name, model_name, part_number)
-            html_text, pdf_texts = process_html_and_pdf(link)
-            info_model = generate_info_model(html_text, pdf_texts)
+            link = search_and_rate(brand_name, model_name, part_number)
+            text_info = get_source_links(link)
+            info_model = generate_info_model(text_info)
 
-            st.write(f"Ссылка: {link}")
-            st.write(f"Уверенность: {confidence_rate:.2f}")
-            st.write(f"HTML-текст: {html_text}")
-            st.write(f"PDF-тексты: {pdf_texts}")
+            # st.write(f"Ссылка: {link}")
+            # # st.write(f"Уверенность: {confidence_rate:.2f}")
+            # st.write(f"HTML-текст: {html_text}")
+            # st.write(f"PDF-тексты: {pdf_texts}")
             st.json(info_model)
 
 if __name__ == "__main__":

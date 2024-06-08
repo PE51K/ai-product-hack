@@ -223,7 +223,7 @@ def get_final_product_characteristics(product_characteristics_from_sources: List
 
 ## Предварительная структура
 
-my_streamlit_app/
+ai_product_hack_app/
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
