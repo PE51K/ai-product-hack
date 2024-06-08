@@ -222,7 +222,7 @@ def get_final_product_characteristics(product_characteristics_from_sources: List
 
 
 ## Предварительная структура
-
+```
 ai_product_hack_app/
 ├── .gitignore
 ├── README.md
@@ -248,7 +248,7 @@ ai_product_hack_app/
 └── tests/
     ├── __init__.py
     └── test_app.py
-
+```
 
 <details><summary><b> How to install and run the application</b></summary>
 
