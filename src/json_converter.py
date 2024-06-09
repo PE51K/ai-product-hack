@@ -99,3 +99,24 @@ for row in csv_data:
 with open('new_data.json', 'w', encoding='utf-8') as f:
     json.dump(new_json_data, f, indent=4)
 
+
+# Новый JSON-файл будет иметь следующую структуру:
+# {
+#   "Код Товара_1": {
+#     "html_text": "текст из HTML страницы 1",
+#     "pdf_texts": null, # или массив с текстами из PDF, если они есть
+#     "source": {
+#       "link": "https://example.com/article1", # ссылка на страницу 1
+#       "confidence_rate": 0.8 # уровень уверенности для страницы 1
+#     }
+#   },
+#   "Код Товара_2": {
+#     "html_text": "текст из HTML страницы 2",
+#     "pdf_texts": null, # или массив с текстами из PDF, если они есть
+#     "source": {
+#       "link": "https://example.com/article2", # ссылка на страницу 2
+#       "confidence_rate": 0.7 # уровень уверенности для страницы 2
+#     }
+#   },
+#   ...
+# }
