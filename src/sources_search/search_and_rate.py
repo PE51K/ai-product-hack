@@ -1,11 +1,12 @@
 import os
 from typing import List
+import asyncio
 
 from yandex_gpt import YandexGPT, YandexGPTConfigManagerForAPIKey
 
-from src.sources_search.search import fetch_search_results
-from src.sources_search.xml_parsing import parse_xml_response
-from src.types_definition import ProductInfo, SourceLink, SearchResult
+from .search import fetch_search_results
+from .xml_parsing import parse_xml_response
+from types_definition import ProductInfo, SourceLink, SearchResult
 
 
 async def process_message(sem, message, yandex_gpt):
@@ -58,7 +59,13 @@ async def search_and_rate(product_info: ProductInfo) -> List[SourceLink]:
     query = f"{product_info['brand_name']} {product_info['model_name']} {product_info['part_number']}"
 
     response = await fetch_search_results(base_link, folder_id, api_key, query)
+    # print(response)
     search_results: List[SearchResult] = parse_xml_response(response)
+
+
+    res_deb = parse_xml_response(response)
+    print(res_deb)
+    print("len= ", len(res_deb))
 
     search_results_rates = await rate_search_results(
         search_results,

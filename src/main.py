@@ -1,10 +1,13 @@
 import streamlit as st
 import json
+import asyncio
+import logging
 
 from types_definition.product_info import ProductInfo
 from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
-# from sources_search import search_and_rate
+from sources_search.search_and_rate import search_and_rate
 
+logging.basicConfig(filename='app.log', level=logging.INFO)
 
 product_info = ProductInfo(
     brand_name="ACER",
@@ -21,19 +24,19 @@ text_info = TextInfoFromSource(
 )
 
 
-def search_and_rate(brand_name, model_name, part_number):
-    """
-    Функция имитирует первый алгоритм, возвращая объект SourceLink.
+# def search_and_rate(brand_name, model_name, part_number):
+#     """
+#     Функция имитирует первый алгоритм, возвращая объект SourceLink.
 
-    Args:
-        brand_name (str): Название бренда.
-        model_name (str): Название модели.
-        part_number (int, optional): Номер детали.
+#     Args:
+#         brand_name (str): Название бренда.
+#         model_name (str): Название модели.
+#         part_number (int, optional): Номер детали.
 
-    Returns:
-        SourceLink: Объект SourceLink с ссылкой и показателем уверенности.
-    """
-    return SourceLink(link="https://example.com", confidence_rate=0.8) 
+#     Returns:
+#         SourceLink: Объект SourceLink с ссылкой и показателем уверенности.
+#     """
+#     return SourceLink(link="https://example.com", confidence_rate=0.8) 
 
 
 def get_source_links(source_link: SourceLink):
@@ -94,7 +97,7 @@ def generate_info_model(text_info: TextInfoFromSource):
     return json_model
 
 
-def main():
+async def main():
     # Разделение приложения на разделы с помощью заголовков
     st.title("Визуализация ML-проекта")
 
@@ -105,18 +108,56 @@ def main():
         part_number = st.text_input("Номер детали (опционально)")
         submit_button = st.form_submit_button("Запустить")
 
+        # # Для проверки 
+        # brand_name = "TCL"
+        # model_name = "20 SE"
+        # part_number = "T671H-2ALCRU12"
+
+        # product_info = ProductInfo(
+        #     brand_name=brand_name,
+        #     model_name=model_name,
+        #     part_number=part_number)
+
+        product_info = ProductInfo(
+            brand_name="ACER",
+            model_name="CC715-91P-X7V8",
+            part_number="NX.C5FER.001")
+
     # Раздел для отображения результатов
     with st.expander("Результаты"):
         if submit_button:
-            link = search_and_rate(brand_name, model_name, part_number)
-            text_info = get_source_links(link)
-            info_model = generate_info_model(text_info)
+            try:
+                link = await search_and_rate(product_info)
+                text_info = get_source_links(link)
+                info_model = generate_info_model(text_info)
 
-            # st.write(f"Ссылка: {link}")
-            # # st.write(f"Уверенность: {confidence_rate:.2f}")
-            # st.write(f"HTML-текст: {html_text}")
-            # st.write(f"PDF-тексты: {pdf_texts}")
-            st.json(info_model)
+                st.json(info_model)
+
+                print(info_model)
+
+                st.session_state["info_model"] = info_model
+                st.session_state["results_ready"] = True
+                st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
+            except TimeoutError:
+                logging.error("Превышено время ожидания Yandex GPT.")
+                st.error("Превышено время ожидания Yandex GPT.")
+
+            except Exception as e:
+                logging.error(f"Ошибка: {str(e)}")
+                st.error(f"Ошибка: {str(e)}")
+
+        # Кнопка для отображения результатов
+        if st.button("Показать результаты"):
+            if st.session_state.get("results_ready", False):
+                st.json(st.session_state["info_model"])
+            else:
+                st.warning("Сначала выполните обработку данных.")
 
 if __name__ == "__main__":
-    main()
+    # main()
+
+    from dotenv import load_dotenv
+    load_dotenv("env/.env.yandex_search")
+    load_dotenv("env/.env.api_key")
+
+    asyncio.run(main())
