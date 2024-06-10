@@ -2,10 +2,12 @@ import streamlit as st
 import json
 import asyncio
 import logging
+import nest_asyncio
 
 from types_definition.product_info import ProductInfo
 from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
 from sources_search.search_and_rate import search_and_rate
+from utils.content_retriever import get_source_links_single
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
@@ -39,19 +41,19 @@ text_info = TextInfoFromSource(
 #     return SourceLink(link="https://example.com", confidence_rate=0.8) 
 
 
-def get_source_links(source_link: SourceLink):
-    """
-    Функция имитирует второй алгоритм, извлекая текст из HTML и PDF по ссылке из объекта SourceLink.
+# def get_source_links(source_link: SourceLink):
+#     """
+#     Функция имитирует второй алгоритм, извлекая текст из HTML и PDF по ссылке из объекта SourceLink.
 
-    Args:
-        source_link (SourceLink): Объект SourceLink с ссылкой.
+#     Args:
+#         source_link (SourceLink): Объект SourceLink с ссылкой.
 
-    Returns:
-        TextInfoFromSource: Объект TextInfoFromSource с извлеченным текстом.
-    """
-    html_text = "Извлеченный текст HTML"
-    pdf_texts = ["Текст из PDF 1", "Текст из PDF 2"]
-    return TextInfoFromSource(html_text=html_text, pdf_texts=pdf_texts, source=source_link)
+#     Returns:
+#         TextInfoFromSource: Объект TextInfoFromSource с извлеченным текстом.
+#     """
+#     html_text = "Извлеченный текст HTML"
+#     pdf_texts = ["Текст из PDF 1", "Текст из PDF 2"]
+#     return TextInfoFromSource(html_text=html_text, pdf_texts=pdf_texts, source=source_link)
 
 
 def generate_info_model(text_info: TextInfoFromSource):
@@ -96,6 +98,9 @@ def generate_info_model(text_info: TextInfoFromSource):
 
     return json_model
 
+async def async_search_and_rate(product_info):
+    return await search_and_rate(product_info)
+
 
 async def main():
     # Разделение приложения на разделы с помощью заголовков
@@ -127,8 +132,15 @@ async def main():
     with st.expander("Результаты"):
         if submit_button:
             try:
-                link = await search_and_rate(product_info)
-                text_info = get_source_links(link)
+                # link = await search_and_rate(product_info)
+                # link = asyncio.get_event_loop().run_until_complete(search_and_rate(product_info))
+                loop = asyncio.get_event_loop()
+                links = loop.run_until_complete(async_search_and_rate(product_info))
+                print("begin get_source_links_single(link)")
+                text_info = get_source_links_single(links[0])
+                # text_info = get_source_links_single(link)
+                print("finish get_source_links_single(link)")
+                print("text_info ", text_info)
                 info_model = generate_info_model(text_info)
 
                 st.json(info_model)
@@ -159,5 +171,8 @@ if __name__ == "__main__":
     from dotenv import load_dotenv
     load_dotenv("env/.env.yandex_search")
     load_dotenv("env/.env.api_key")
+
+    # Enable nest_asyncio
+    nest_asyncio.apply()
 
     asyncio.run(main())

@@ -1,12 +1,36 @@
 import os
+import sys
 from typing import List
 import asyncio
 
 from yandex_gpt import YandexGPT, YandexGPTConfigManagerForAPIKey
 
+# # Определите путь к папке types_definition
+# parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+# types_definition_dir = os.path.join(parent_dir, 'types_definition')
+
+# # Добавьте этот путь к sys.path
+# sys.path.append(types_definition_dir)
+
+# Определите путь к корню проекта
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
+# Определите путь к папке types_definition и добавьте его в sys.path
+types_definition_dir = os.path.join(root_dir, 'src', 'types_definition')
+sys.path.append(types_definition_dir)
+
+# Теперь можно импортировать модули из types_definition
+from source_links import SourceLink, SearchResult, TextInfoFromSource
+from product_info import ProductInfo
+
+
 from .search import fetch_search_results
 from .xml_parsing import parse_xml_response
-from types_definition import ProductInfo, SourceLink, SearchResult
+# from types_definition.source_links import SourceLink, SearchResult, TextInfoFromSource
+# from types_definition.product_info import ProductInfo
+
+# from src.types_definition.source_links import SourceLink, SearchResult, TextInfoFromSource
+# from src.types_definition.product_info import ProductInfo
 
 
 async def process_message(sem, message, yandex_gpt):
@@ -62,16 +86,19 @@ async def search_and_rate(product_info: ProductInfo) -> List[SourceLink]:
     # print(response)
     search_results: List[SearchResult] = parse_xml_response(response)
 
-
+    # Для тестирования 
+    search_results = search_results[:5]
     res_deb = parse_xml_response(response)
     print(res_deb)
     print("len= ", len(res_deb))
 
+    print("begin search_results_rates")
     search_results_rates = await rate_search_results(
         search_results,
         YandexGPT(YandexGPTConfigManagerForAPIKey()),
         asyncio.Semaphore(1)
     )
+    print("finish search_results_rates")
 
     return [
         SourceLink(
@@ -82,7 +109,7 @@ async def search_and_rate(product_info: ProductInfo) -> List[SourceLink]:
 
 
 if __name__ == "__main__":
-    os.chdir("../../")
+    # os.chdir("../../")
 
     from dotenv import load_dotenv
     load_dotenv("env/.env.yandex_search")
@@ -95,4 +122,5 @@ if __name__ == "__main__":
     )
 
     import asyncio
-    print(asyncio.run(search_and_rate(product_info)))
+    link = asyncio.run(search_and_rate(product_info))
+    print(link)
