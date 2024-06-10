@@ -87,7 +87,7 @@ async def search_and_rate(product_info: ProductInfo) -> List[SourceLink]:
     search_results: List[SearchResult] = parse_xml_response(response)
 
     # Для тестирования 
-    search_results = search_results[:5]
+    # search_results = search_results[:5]
     res_deb = parse_xml_response(response)
     print(res_deb)
     print("len= ", len(res_deb))

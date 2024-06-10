@@ -94,9 +94,12 @@ def generate_info_model(text_info: TextInfoFromSource):
     }
 
     # Преобразование info_model в JSON
-    json_model = json.dumps(info_model, indent=4)
+    # json_model = json.dumps(info_model, indent=4)
+
+    json_model = json.dumps(text_info, indent=4)
 
     return json_model
+
 
 async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
