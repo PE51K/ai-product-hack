@@ -35,9 +35,14 @@ from .xml_parsing import parse_xml_response
 
 async def process_message(sem, message, yandex_gpt):
     async with sem:
-        result = await yandex_gpt.get_async_completion(messages=message, temperature=0.0, max_tokens=10, timeout=100)
-        print(result)
-        return result
+        try:
+            # result = await yandex_gpt.get_async_completion(messages=message, temperature=0.0, max_tokens=10, timeout=100)
+            result = yandex_gpt.get_sync_completion(messages=message, temperature=0.0, max_tokens=10)
+            print(result)
+            return result
+        except Exception as e:
+            print("e")
+            return 0.5
 
 
 async def rate_search_results(search_results: List[SearchResult], yandex_gpt, sem) -> List[float]:
@@ -68,7 +73,8 @@ async def rate_search_results(search_results: List[SearchResult], yandex_gpt, se
         }
     ] for search_result in search_results]
 
-    sem = asyncio.Semaphore(10)
+    # sem = asyncio.Semaphore(10)
+    sem = asyncio.Semaphore(1)
     tasks = [process_message(sem, message, yandex_gpt) for message in messages]
     results = await asyncio.gather(*tasks)
 
