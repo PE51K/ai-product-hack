@@ -2,7 +2,7 @@ from yandex_gpt import YandexGPT, YandexGPTConfigManagerForAPIKey
 from typing import Dict, List
 
 
-async def get_product_description(
+def get_product_description(
         product_type: str,
         product_brand: str,
         product_name: str,
@@ -145,6 +145,6 @@ async def get_product_description(
         {"role": "user", "content": user_prompt},
     ]
 
-    description = await yandex_gpt.get_async_completion(messages=messages, temperature=0.0, max_tokens=3000, timeout=100)
+    description = yandex_gpt.get_sync_completion(messages=messages, temperature=0.5, max_tokens=3000)
 
     return description
