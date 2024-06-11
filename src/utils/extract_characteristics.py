@@ -136,9 +136,13 @@ def merge_dicts(list_of_dicts: List[Dict]) -> Dict:
 
 # Обрабатываем ответ модели и приводим к нужному формату словаря
 async def process_model_answer(text: str, characteristics: List[str]) -> Dict:
+    # Получаем ответ от модели для конкретного текста и набора характеристик
     answer = await extract_characteristics_from_text(text, characteristics)
+    # Фильтруем пустые ответы
     filtered_list = [item for item in answer if item != ' ']
+    # Преобразуем строковые представления словарей в настоящие словари
     filtered_list = [eval(item) for item in filtered_list]
+    # Преобразуем строковые представления словарей в настоящие словари
     final_dict = merge_dicts(filtered_list)
     return final_dict
 
@@ -176,16 +180,104 @@ async def get_characteristics_by_part_number(part_number: int) -> Dict:
     characteristics, mapping = preprocessing_and_map(characteristics)
     
     # Вывод ответа модели
+    # Получаем ответ модели для текста и характеристик
     answer = await process_model_answer(text, characteristics)
+    # Возвращаем старые названия характеристик в соответствии с исходным словарем
     result = map_old_names_to_characteristics(mapping, answer)
     
     return result
 
-# Главная функция для запуска скрипта
+# переделать изменить, сделать для списка
+async def get_product_characteristics_from_sources_single(product_texts_from_sources: list[TextInfoFromSource]):
+
+    # выбираем один продукт пока TODO
+    product_info = product_texts_from_sources[0]
+
+    
+    # # Извлекаем рейтинг уверенности и URL источника для заданного номера детали
+    # confidence_rate = text_json[part_number]['source']['confidence_rate']
+    # url = text_json[part_number]['source']['link']
+
+    text = product_info['html_text']  # Если используется html_text для обработки
+
+    # Извлекаем рейтинг уверенности и URL источника для текущего продукта
+    confidence_rate = product_info['source']['confidence_rate']
+    url = product_info['source']['link']
+
+
+    
+    # Определяем путь к Excel-файлу с характеристиками
+    path_characteristics = os.path.join(current_dir, '..', 'laptop.xlsx')
+    
+    # Читаем Excel-файл и собираем уникальные характеристики в список
+    characteristics = collect_characteristics_list(path_characteristics)
+    
+    # Предобрабатываем характеристики и создаем словарь замены старых названий на новые
+    characteristics, mapping = preprocessing_and_map(characteristics)
+    
+    # Получаем ответ модели для текста и характеристик
+    answer = await process_model_answer(text, characteristics)
+    
+    # Возвращаем старые названия характеристик в соответствии с исходным словарем
+    final_characteristics = map_old_names_to_characteristics(mapping, answer)
+    
+    # Формируем финальный словарь с характеристиками и метаданными источника
+    result = {
+        "characteristics": final_characteristics,
+        "source": {
+            "link": url,
+            "confidence_rate": confidence_rate
+        }
+    }
+    
+    return result
+
+
+# # Главная функция для запуска скрипта старая
+# def main():
+#     # part_number = 1383001  # Пример номера части
+#     # part_number = 1497691  # Пример номера части
+#     part_number = 2008797
+#     result = asyncio.run(get_characteristics_by_part_number(part_number))
+#     print(result)
+
+
+
+# Главная функция для тестирования  скрипта
+# get_product_characteristics_from_sources_single
 def main():
-    part_number = 1383001  # Пример номера части
-    result = asyncio.run(get_characteristics_by_part_number(part_number))
+    # part_number = 1383001  # Пример номера части
+    # part_number = 1497691  # Пример номера части
+    part_number = 2008797
+    part_number = str(part_number)
+
+    # Загружаем текст
+    json_file_path = os.path.join(current_dir, '..', 'new_data.json')
+    text_json = read_json_file(json_file_path)
+
+    text = text_json[part_number]['html_text']
+    pdf_texts = text_json[part_number]['pdf_texts']
+    # Вычленяем confidence_rate и ссылку
+    confidence_rate = text_json[part_number]['source']['confidence_rate']
+    url = text_json[part_number]['source']['confidence_rate']
+
+    text_info_list = []
+
+    # Создаем объект TextInfoFromSource
+    product_texts_from_sources = TextInfoFromSource(
+        html_text=text,
+        pdf_texts=pdf_texts,  # Если PDF текстов нет, можно оставить None
+        source=SourceLink(
+            link=url,
+            confidence_rate=confidence_rate
+        )
+    )
+    text_info_list.append(product_texts_from_sources)
+
+    result = asyncio.run(get_product_characteristics_from_sources_single(text_info_list))
     print(result)
+
+
 
 if __name__ == "__main__":
     os.chdir("../../")
