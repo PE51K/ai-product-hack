@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_option_menu import option_menu
 import json
 import asyncio
 import logging
@@ -28,88 +29,13 @@ text_info = TextInfoFromSource(
 )
 
 
-# def search_and_rate(brand_name, model_name, part_number):
-#     """
-#     Функция имитирует первый алгоритм, возвращая объект SourceLink.
-
-#     Args:
-#         brand_name (str): Название бренда.
-#         model_name (str): Название модели.
-#         part_number (int, optional): Номер детали.
-
-#     Returns:
-#         SourceLink: Объект SourceLink с ссылкой и показателем уверенности.
-#     """
-#     return SourceLink(link="https://example.com", confidence_rate=0.8) 
-
-
-# def get_source_links(source_link: SourceLink):
-#     """
-#     Функция имитирует второй алгоритм, извлекая текст из HTML и PDF по ссылке из объекта SourceLink.
-
-#     Args:
-#         source_link (SourceLink): Объект SourceLink с ссылкой.
-
-#     Returns:
-#         TextInfoFromSource: Объект TextInfoFromSource с извлеченным текстом.
-#     """
-#     html_text = "Извлеченный текст HTML"
-#     pdf_texts = ["Текст из PDF 1", "Текст из PDF 2"]
-#     return TextInfoFromSource(html_text=html_text, pdf_texts=pdf_texts, source=source_link)
-
-
-def generate_info_model(text_info: TextInfoFromSource):
-    """
-    Функция имитирует генерацию JSON-инфомодели продукта на основе извлеченного текста.
-
-    Args:
-        text_info (TextInfoFromSource): Объект TextInfoFromSource с извлеченным текстом.
-
-    Returns:
-        str: JSON-строка, представляющая инфомодель продукта.
-    """
-    # html_text = text_info.html_text
-    # pdf_texts = text_info.pdf_texts
-
-    # # Извлечение информации из текста
-    # info_model = {}
-
-    # # Пример извлечения характеристик из HTML-текста
-    # for match in re.finditer(r"<p>(.*?)</p>", html_text):
-    #     text = match.group(1)
-    #     if ":" in text:
-    #         key, value = text.split(":")
-    #         info_model[key.strip()] = value.strip()
-
-    # # Пример извлечения характеристик из PDF-текстов
-    # for pdf_text in pdf_texts:
-    #     pass
-    #     # ... (Логика извлечения информации из pdf_text)
-    #     # ... (Обновление info_model)
-
-    # ... (Дополнительная логика извлечения информации)
-
-    info_model = {
-        "характеристика1": "значение1",
-        "характеристика2": "значение2",
-        # ...
-    }
-
-    # Преобразование info_model в JSON
-    # json_model = json.dumps(info_model, indent=4)
-
-    json_model = json.dumps(text_info, indent=4)
-
-    return json_model
-
-
 async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
 
 
-async def main():
+async def main_task1():
     # Разделение приложения на разделы с помощью заголовков
-    st.title("Визуализация ML-проекта")
+    st.title("AI Product Hack (Кейс 4)")
 
     # Раздел для ввода данных пользователем
     with st.form(key="data_input"):
@@ -177,6 +103,45 @@ async def main():
             else:
                 st.warning("Сначала выполните обработку данных.")
 
+async def main_task2():
+    # Разделение приложения на разделы с помощью заголовков
+    st.title("AI Product Hack (Кейс 4)")
+
+
+def run_main_menu():
+    # Создание списка названий страниц
+    page_names = ["Task 1", "Task 2", "Info"]
+
+    # Создание меню с помощью option_menu
+    selected_page = option_menu(
+        menu_title="Navigation",
+        # menu_title=None,
+        options=page_names,
+        icons=["house", "envelope", "info"],
+    )
+
+    # if selected_page == "":
+    #     st.write("")
+    # elif selected_page == "":
+    #     st.write("")
+    # else:
+    #     st.write("")
+
+
+    match selected_page:
+        case "Task 1":
+            # Enable nest_asyncio
+            nest_asyncio.apply()
+            asyncio.run(main_task1())
+        case "Task 2":
+            # st.write("Task 2")
+            nest_asyncio.apply()
+            asyncio.run(main_task2())
+        case "Info":
+            pass
+        # case _:
+
+
 if __name__ == "__main__":
     # main()
 
@@ -184,7 +149,9 @@ if __name__ == "__main__":
     load_dotenv("env/.env.yandex_search")
     load_dotenv("env/.env.api_key")
 
-    # Enable nest_asyncio
-    nest_asyncio.apply()
+    # # Enable nest_asyncio
+    # nest_asyncio.apply()
 
-    asyncio.run(main())
+    # asyncio.run(main())
+
+    run_main_menu()
