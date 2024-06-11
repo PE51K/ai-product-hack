@@ -79,6 +79,7 @@ async def process_message(sem, message, yandex_gpt):
     try:
         async with sem:
             result = await yandex_gpt.get_async_completion(messages=message, temperature=0.0, max_tokens=8000, timeout=200)
+            # result = yandex_gpt.get_sync_completion(messages=message, temperature=0.0, max_tokens=8000)
             print('/n', message) 
             print(result)
             return result
@@ -120,6 +121,7 @@ async def extract_characteristics_from_text(text: str, characteristics: List[str
             ])
 
     sem = asyncio.Semaphore(10)
+    # sem = asyncio.Semaphore(1)
     tasks = [process_message(sem, message, yandex_gpt) for message in messages]
     results = await asyncio.gather(*tasks)
 
