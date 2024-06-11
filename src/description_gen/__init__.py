@@ -1,5 +1,5 @@
-from .description import get_product_description
-from .summary import get_summary_from_description, get_product_summary
+from src.description_gen.description import get_product_description
+from src.description_gen.summary import get_summary_from_description, get_product_summary
 
 
 __all__ = [
