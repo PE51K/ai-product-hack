@@ -122,7 +122,7 @@ def run_main_menu():
             menu_title="Navigation",
             # menu_title=None,
             options=page_names,
-            icons=["house", "envelope", "info"],
+            icons=["filter", "filter", "info"],
         )
 
     # if selected_page == "":
