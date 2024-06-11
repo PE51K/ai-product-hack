@@ -112,13 +112,15 @@ def run_main_menu():
     # Создание списка названий страниц
     page_names = ["Task 1", "Task 2", "Info"]
 
-    # Создание меню с помощью option_menu
-    selected_page = option_menu(
-        menu_title="Navigation",
-        # menu_title=None,
-        options=page_names,
-        icons=["house", "envelope", "info"],
-    )
+    # Создание меню
+    with st.sidebar:
+        # Создание меню с помощью option_menu
+        selected_page = option_menu(
+            menu_title="Navigation",
+            # menu_title=None,
+            options=page_names,
+            icons=["house", "envelope", "info"],
+        )
 
     # if selected_page == "":
     #     st.write("")
