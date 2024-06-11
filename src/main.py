@@ -109,6 +109,9 @@ async def main_task2():
 
 
 def run_main_menu():
+    primary_color = "#007bff"
+    secondary_color = "#6c757d"
+
     # Создание списка названий страниц
     page_names = ["Task 1", "Task 2", "Info"]
 
@@ -128,6 +131,34 @@ def run_main_menu():
     #     st.write("")
     # else:
     #     st.write("")
+
+    # Стилизация CSS
+    menu_style = """
+    <style>
+        .option_menu {
+            background-color: {secondary_color};
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .option_menu .option_menu-item {
+            display: inline-block;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 0 10px;
+        }
+
+        .option_menu .option_menu-item a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .option_menu .option_menu-item.is-selected {
+            background-color: {primary_color};
+        }
+    </style>
+    """
+    st.write(menu_style, unsafe_allow_html=True)
 
 
     match selected_page:
