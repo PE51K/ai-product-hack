@@ -191,8 +191,7 @@ async def get_characteristics_by_part_number(part_number: int) -> Dict:
 async def get_product_characteristics_from_sources_single(product_texts_from_sources: list[TextInfoFromSource]):
 
     # выбираем один продукт пока TODO
-    product_info = product_texts_from_sources[0]
-
+    product_info = product_texts_from_sources[0] #  TODO !!!!!!!!!!!
     
     # # Извлекаем рейтинг уверенности и URL источника для заданного номера детали
     # confidence_rate = text_json[part_number]['source']['confidence_rate']
@@ -287,4 +286,4 @@ if __name__ == "__main__":
     load_dotenv("env/.env.api_key")
 
 
-    main()
+    # main()

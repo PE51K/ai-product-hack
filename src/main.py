@@ -8,8 +8,10 @@ from types_definition.product_info import ProductInfo
 from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
 from sources_search.search_and_rate import search_and_rate
 from utils.content_retriever import get_source_links_single
+from utils.extract_characteristics import get_product_characteristics_from_sources_single
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
+
 
 product_info = ProductInfo(
     brand_name="ACER",
@@ -126,10 +128,15 @@ async def main():
         #     model_name=model_name,
         #     part_number=part_number)
 
+        # product_info = ProductInfo(
+        #     brand_name="ACER",
+        #     model_name="CC715-91P-X7V8",
+        #     part_number="NX.C5FER.001")
+
         product_info = ProductInfo(
-            brand_name="ACER",
-            model_name="CC715-91P-X7V8",
-            part_number="NX.C5FER.001")
+            brand_name="AQUARIUS",
+            model_name="CMP NS483 (Исп.2)",
+            part_number="NS4831524116Q151E90NT2NNNN2")
 
     # Раздел для отображения результатов
     with st.expander("Результаты"):
@@ -144,7 +151,9 @@ async def main():
                 # text_info = get_source_links_single(link)
                 print("finish get_source_links_single(link)")
                 print("text_info ", text_info)
-                info_model = generate_info_model(text_info)
+
+                # info_model = generate_info_model(text_info)
+                info_model = loop.run_until_complete(get_product_characteristics_from_sources_single([text_info]))
 
                 st.json(info_model)
 
