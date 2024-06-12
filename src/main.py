@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+# from streamlit_upload import StreamlitUpload
 import json
 import asyncio
 import logging
@@ -31,6 +32,46 @@ text_info = TextInfoFromSource(
 
 async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
+
+
+
+def product_input_interface():
+    # Название бренда
+    brand_name = st.text_input('Название бренда')
+
+    # Модель
+    model_name = st.text_input('Модель (как она написана официальным производителем)')
+
+    # Парт-номер производителя
+    part_number = st.text_input('Парт-номер производителя (если есть)')
+
+    # Характеристики товара
+    characteristics = st.text_area('Характеристики товара в структурированном описании по инфомодели')
+
+    # Набор ссылок на известные ресурсы про товар в интернете
+    links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
+
+    # PDF с маркетинговыми материалами и инструкцией пользователя
+    pdf_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf'])
+
+    # Вывод введенных данных
+    st.write("### Введенные данные:")
+    st.write(f"**Название бренда:** {brand_name}")
+    st.write(f"**Модель:** {model_name}")
+    st.write(f"**Парт-номер производителя:** {part_number}")
+    st.write(f"**Характеристики товара:**\n{characteristics}")
+    st.write(f"**Ссылки на известные ресурсы:**\n{links}")
+
+    # Вывод загруженных PDF файлов
+    if pdf_files:
+        st.write("**Загруженные PDF файлы:**")
+        for pdf in pdf_files:
+            st.write(pdf.name)
+
+# Вызов функции для запуска интерфейса
+if __name__ == '__main__':
+    product_input_interface()
+
 
 
 async def main_task1():
