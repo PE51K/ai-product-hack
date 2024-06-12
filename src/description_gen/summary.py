@@ -76,8 +76,8 @@ def get_product_summary(
     )
 
     messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
+        {"role": "system", "text": system_prompt},
+        {"role": "user", "text": user_prompt},
     ]
 
     summary = yandex_gpt.get_sync_completion(messages=messages, temperature=0.5, max_tokens=300)
@@ -122,8 +122,8 @@ def get_summary_from_description(
     user_prompt = f"Детальное описание продукта:\n\n{product_description}"
 
     messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
+        {"role": "system", "text": system_prompt},
+        {"role": "user", "text": user_prompt},
     ]
 
     summary = yandex_gpt.get_sync_completion(messages=messages, temperature=0.5, max_tokens=300)

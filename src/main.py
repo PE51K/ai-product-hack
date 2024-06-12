@@ -114,7 +114,7 @@ def product_input_interface():
                         print(extracted_text)
                         st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
                         print("remove data files")
-                        os.remove(temp_pdf_path)
+                        # os.remove(temp_pdf_path)
             except Exception as e:
                 logging.error(f"Ошибка загрузки фаилов: {str(e)}")
                 st.error(f"Ошибка: {str(e)}")
@@ -155,10 +155,10 @@ def product_input_interface():
                 product_brand = brand_name
                 product_name = model_name
                 loop = asyncio.get_event_loop()
-                links = loop.run_until_complete(async_search_and_rate(product_info))
+                # links = loop.run_until_complete(async_search_and_rate(product_info))
 
-                # product_description = get_product_description(product_type, product_brand, product_name, characteristics, data_file_content)
-                product_description = loop.run_until_complete(get_product_description(product_type, product_brand, product_name, characteristics, data_file_content))
+                product_description = get_product_description(product_type, product_brand, product_name, characteristics, data_file_content)
+                # product_description = loop.run_until_complete(get_product_description(product_type, product_brand, product_name, characteristics, data_file_content))
                 print("product_description", product_description)
 
                 summary = get_summary_from_description(product_description)

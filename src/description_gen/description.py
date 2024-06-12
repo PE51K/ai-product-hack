@@ -1,6 +1,7 @@
 from yandex_gpt import YandexGPT, YandexGPTConfigManagerForAPIKey
 from typing import Dict, List
-
+import logging
+logging.basicConfig(filename='app.log', level=logging.INFO)
 
 def get_product_description(
         product_type: str,
@@ -21,6 +22,7 @@ def get_product_description(
     Returns:
       str: The generated product description.
     """
+    logging.error("get_product_description start")
     yandex_gpt = YandexGPT(config_manager=YandexGPTConfigManagerForAPIKey())
 
     description_example = (
@@ -141,10 +143,11 @@ def get_product_description(
     )
 
     messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
+        {"role": "system", "text": system_prompt},
+        {"role": "user", "text": user_prompt},
     ]
 
     description = yandex_gpt.get_sync_completion(messages=messages, temperature=0.5, max_tokens=3000)
+    logging.error("get_product_description end")
 
     return description
