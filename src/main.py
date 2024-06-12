@@ -5,11 +5,14 @@ import json
 import asyncio
 import logging
 import nest_asyncio
+import tempfile
+import os
 
 from types_definition.product_info import ProductInfo
 from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
 from sources_search.search_and_rate import search_and_rate
 from utils.content_retriever import get_source_links_single
+from utils.content_retriever import extract_text_from_pdf
 from utils.extract_characteristics import get_product_characteristics_from_sources_single
 from description_gen.description import get_product_description
 from description_gen.summary import get_product_summary, get_summary_from_description
@@ -39,41 +42,52 @@ async def async_search_and_rate(product_info):
 
 def product_input_interface():
 
-    brand_name = st.text_input('Название бренда')
-    model_name = st.text_input('Модель (как она написана официальным производителем)')
-    part_number = st.text_input('Парт-номер производителя (если есть)')
+        # Раздел для ввода данных пользователем
+    # with st.form(key="data_input"):
 
-    # characteristics = st.text_area('Характеристики товара в структурированном описании по инфомодели')
-    # JSON файл с характеристиками товара
-    characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
+    with st.form(key='product_form'):
+        
+        product_type = st.text_input('Тип продукта')
+        brand_name = st.text_input('Название бренда')
+        model_name = st.text_input('Модель (как она написана официальным производителем)')
+        part_number = st.text_input('Парт-номер производителя (если есть)')
 
-    # Набор ссылок на известные ресурсы про товар в интернете
-    links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
+        # characteristics = st.text_area('Характеристики товара в структурированном описании по инфомодели')
+        # JSON файл с характеристиками товара
+        characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
 
-    # PDF с маркетинговыми материалами и инструкцией пользователя
-    data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
+        # Набор ссылок на известные ресурсы про товар в интернете
+        links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
+
+        # PDF с маркетинговыми материалами и инструкцией пользователя
+        data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
+        # submit_button = st.form_submit_button("Запустить")
+        submit_button = st.form_submit_button(label='Показать введенные данные')
 
 
-    if st.button('Показать введенные данные'):
-        # Если загружен JSON файл, показать его содержимое
-        if characteristics_json is not None:
-            characteristics = json.load(characteristics_json)
-        else:
-            characteristics = {}
+        # if st.button('Показать введенные данные'):
+        if submit_button:
+            # Если загружен JSON файл, показать его содержимое
+            if characteristics_json is not None:
+                characteristics = json.load(characteristics_json)
+            else:
+                characteristics = {}
 
-        # Примерные данные для тестирования УДАЛИТЬ!!!
-        brand_name="AQUARIUS",
-        model_name="CMP NS483 (Исп.2)",
-        part_number="NS4831524116Q151E90NT2NNNN2"
-        default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
-        characteristics = laptop_characteristics_json
+            # Примерные данные для тестирования УДАЛИТЬ!!!
+            product_type = "ноутбук"
+            brand_name="AQUARIUS",
+            model_name="CMP NS483 (Исп.2)",
+            part_number="NS4831524116Q151E90NT2NNNN2"
+            default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+            characteristics = laptop_characteristics_json
 
-        st.write("### Введенные данные:")
-        st.write(f"**Название бренда:** {brand_name}")
-        st.write(f"**Модель:** {model_name}")
-        st.write(f"**Парт-номер производителя:** {part_number}")
-        st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
-        st.write(f"**Ссылки на известные ресурсы:**\n{links}")
+            st.write("### Введенные данные:")
+            st.write(f"**Тип продукта:** {product_type}")
+            st.write(f"**Название бренда:** {brand_name}")
+            st.write(f"**Модель:** {model_name}")
+            st.write(f"**Парт-номер производителя:** {part_number}")
+            st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
+            st.write(f"**Ссылки на известные ресурсы:**\n{links}")
 
         # # Вывод загруженных PDF файлов
         # if data_files:
@@ -82,13 +96,95 @@ def product_input_interface():
         #         st.write(pdf.name)
 
         if data_files:
-            st.write("**Загруженные файлы:**")
-            for data_file in data_files:
-                st.write(data_file.name)
-                # Отобразить содержимое текстовых файлов
-                if data_file.type == "text/plain":
-                    content = data_file.read().decode("utf-8")
-                    st.text(content)
+            try:
+                st.write("**Загруженные файлы:**")
+                for data_file in data_files:
+                    st.write(data_file.name)
+                    # Отобразить содержимое текстовых файлов
+                    if data_file.type == "text/plain":
+                        content = data_file.read().decode("utf-8")
+                        st.text(content)
+                    elif data_file.type == "application/pdf":
+                        pdf_bytes = data_file.read()
+                        # Создаем временный файл
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+                            temp_pdf.write(pdf_bytes)
+                            temp_pdf_path = temp_pdf.name
+                        extracted_text = extract_text_from_pdf(temp_pdf_path)
+                        print(extracted_text)
+                        st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
+                        print("remove data files")
+                        os.remove(temp_pdf_path)
+            except Exception as e:
+                logging.error(f"Ошибка загрузки фаилов: {str(e)}")
+                st.error(f"Ошибка: {str(e)}")
+
+
+    # Раздел для отображения результатов
+    with st.expander("Результаты"):
+        if submit_button:
+            try:
+                data_file_content = []
+
+                for data_file in data_files:
+                    st.write(data_file.name)
+                    # Отобразить содержимое текстовых файлов
+                    if data_file.type == "text/plain":
+                        content = data_file.read().decode("utf-8")
+                        # st.text(content)
+                        data_file_content.append(content)
+
+                    elif data_file.type == "application/pdf":
+                        pdf_bytes = data_file.read()
+                        # Создаем временный файл
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+                            temp_pdf.write(pdf_bytes)
+                            temp_pdf_path = temp_pdf.name
+                        extracted_text = extract_text_from_pdf(temp_pdf_path)
+                        data_file_content.append(extracted_text)
+                        # print(extracted_text)
+                        st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
+                        print("remove data files")
+                        os.remove(temp_pdf_path)
+
+                # if data_file_content:
+                #     print("data_file_content ", len(data_file_content))
+                #     for elem in data_file_content:
+                #         print("111111111111111",elem)
+
+                product_brand = brand_name
+                product_name = model_name
+                loop = asyncio.get_event_loop()
+                links = loop.run_until_complete(async_search_and_rate(product_info))
+
+                # product_description = get_product_description(product_type, product_brand, product_name, characteristics, data_file_content)
+                product_description = loop.run_until_complete(get_product_description(product_type, product_brand, product_name, characteristics, data_file_content))
+                print("product_description", product_description)
+
+                summary = get_summary_from_description(product_description)
+                print("summary", summary)
+
+                # st.session_state["info_model"] = info_model
+                st.session_state["results_ready"] = True
+                st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
+            except TimeoutError:
+                logging.error("Превышено время ожидания Yandex GPT.")
+                st.error("Превышено время ожидания Yandex GPT.")
+
+            except Exception as e:
+                logging.error(f"Ошибка: {str(e)}")
+                st.error(f"Ошибка: {str(e)}")
+
+        # Кнопка для отображения результатов
+        if st.button("Показать результаты"):
+            if st.session_state.get("results_ready", False):
+                pass
+                print(product_description)
+                # st.json(st.session_state["info_model"])
+            else:
+                st.warning("Сначала выполните обработку данных.")
+
+
 
 
 
@@ -243,8 +339,11 @@ def run_main_menu():
             asyncio.run(main_task1())
         case "Task 2":
             # st.write("Task 2")
+
             nest_asyncio.apply()
             asyncio.run(main_task2())
+
+            # main_task2()
         case "Info":
             pass
         # case _:
