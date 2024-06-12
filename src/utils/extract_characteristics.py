@@ -286,4 +286,4 @@ if __name__ == "__main__":
     load_dotenv("env/.env.api_key")
 
 
-    # main()
+    main()

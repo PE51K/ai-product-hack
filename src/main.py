@@ -11,6 +11,9 @@ from types_definition.source_links import SearchResult, SourceLink, TextInfoFrom
 from sources_search.search_and_rate import search_and_rate
 from utils.content_retriever import get_source_links_single
 from utils.extract_characteristics import get_product_characteristics_from_sources_single
+from description_gen.description import get_product_description
+from description_gen.summary import get_product_summary, get_summary_from_description
+from test_data import laptop_characteristics_json
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
@@ -34,39 +37,74 @@ async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
 
 
-
 def product_input_interface():
-    # Название бренда
+
     brand_name = st.text_input('Название бренда')
-
-    # Модель
     model_name = st.text_input('Модель (как она написана официальным производителем)')
-
-    # Парт-номер производителя
     part_number = st.text_input('Парт-номер производителя (если есть)')
 
-    # Характеристики товара
-    characteristics = st.text_area('Характеристики товара в структурированном описании по инфомодели')
+    # characteristics = st.text_area('Характеристики товара в структурированном описании по инфомодели')
+    # JSON файл с характеристиками товара
+    characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
 
     # Набор ссылок на известные ресурсы про товар в интернете
     links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
 
     # PDF с маркетинговыми материалами и инструкцией пользователя
-    pdf_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf'])
+    data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
 
-    # Вывод введенных данных
-    st.write("### Введенные данные:")
-    st.write(f"**Название бренда:** {brand_name}")
-    st.write(f"**Модель:** {model_name}")
-    st.write(f"**Парт-номер производителя:** {part_number}")
-    st.write(f"**Характеристики товара:**\n{characteristics}")
-    st.write(f"**Ссылки на известные ресурсы:**\n{links}")
 
-    # Вывод загруженных PDF файлов
-    if pdf_files:
-        st.write("**Загруженные PDF файлы:**")
-        for pdf in pdf_files:
-            st.write(pdf.name)
+    if st.button('Показать введенные данные'):
+        # Если загружен JSON файл, показать его содержимое
+        if characteristics_json is not None:
+            characteristics = json.load(characteristics_json)
+        else:
+            characteristics = {}
+
+        # Примерные данные для тестирования УДАЛИТЬ!!!
+        brand_name="AQUARIUS",
+        model_name="CMP NS483 (Исп.2)",
+        part_number="NS4831524116Q151E90NT2NNNN2"
+        default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+        characteristics = laptop_characteristics_json
+
+        st.write("### Введенные данные:")
+        st.write(f"**Название бренда:** {brand_name}")
+        st.write(f"**Модель:** {model_name}")
+        st.write(f"**Парт-номер производителя:** {part_number}")
+        st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
+        st.write(f"**Ссылки на известные ресурсы:**\n{links}")
+
+        # # Вывод загруженных PDF файлов
+        # if data_files:
+        #     st.write("**Загруженные  файлы:**")
+        #     for pdf in data_files:
+        #         st.write(pdf.name)
+
+        if data_files:
+            st.write("**Загруженные файлы:**")
+            for data_file in data_files:
+                st.write(data_file.name)
+                # Отобразить содержимое текстовых файлов
+                if data_file.type == "text/plain":
+                    content = data_file.read().decode("utf-8")
+                    st.text(content)
+
+
+
+    # # Вывод введенных данных
+    # st.write("### Введенные данные:")
+    # st.write(f"**Название бренда:** {brand_name}")
+    # st.write(f"**Модель:** {model_name}")
+    # st.write(f"**Парт-номер производителя:** {part_number}")
+    # st.write(f"**Характеристики товара:**\n{characteristics_json}")
+    # st.write(f"**Ссылки на известные ресурсы:**\n{links}")
+
+    # # Вывод загруженных PDF файлов
+    # if pdf_files:
+    #     st.write("**Загруженные PDF файлы:**")
+    #     for pdf in pdf_files:
+    #         st.write(pdf.name)
 
 
 async def main_task1():
@@ -77,7 +115,7 @@ async def main_task1():
     with st.form(key="data_input"):
         brand_name = st.text_input("Название бренда")
         model_name = st.text_input("Название модели")
-        part_number = st.text_input("Номер детали (опционально)")
+        part_number = st.text_input("Парт-номер производителя (опционально)")
         submit_button = st.form_submit_button("Запустить")
 
         # # Для проверки 
