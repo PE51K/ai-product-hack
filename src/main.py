@@ -68,11 +68,6 @@ def product_input_interface():
         for pdf in pdf_files:
             st.write(pdf.name)
 
-# Вызов функции для запуска интерфейса
-if __name__ == '__main__':
-    product_input_interface()
-
-
 
 async def main_task1():
     # Разделение приложения на разделы с помощью заголовков
@@ -147,6 +142,7 @@ async def main_task1():
 async def main_task2():
     # Разделение приложения на разделы с помощью заголовков
     st.title("AI Product Hack (Кейс 4)")
+    product_input_interface()
 
 
 def run_main_menu():
