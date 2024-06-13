@@ -157,8 +157,11 @@ def str_to_dict(string: str) -> Dict:
 
     res_dict = {}
     for item in splited_string:
-        key, value = item.split(": ")
-        res_dict[key] = value
+        try:
+            key, value = item.split(": ")
+            res_dict[key] = value
+        except Exception as e:
+            pass
 
     return res_dict
 
