@@ -1,6 +1,4 @@
 
-
-
 laptop_characteristics_json = {
 	"product_type": "laptop",
     "brand": "ExampleBrand",
@@ -69,4 +67,6 @@ laptop_characteristics_json = {
     ]
 }
 
-print(laptop_characteristics_json)
+if __name__ == "__main__":
+    pass
+    # print(laptop_characteristics_json)

@@ -16,7 +16,6 @@ from utils.content_retriever import extract_text_from_pdf
 from utils.extract_characteristics import get_product_characteristics_from_sources_single
 from description_gen.description import get_product_description
 from description_gen.summary import get_product_summary, get_summary_from_description
-from test_data import laptop_characteristics_json
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
