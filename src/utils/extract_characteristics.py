@@ -3,6 +3,7 @@ import pandas as pd
 from typing import Dict, List, Optional, TypedDict
 import asyncio
 import os
+from collections import defaultdict, Counter
 from yandex_gpt import YandexGPTConfigManagerForAPIKey, YandexGPT
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -64,7 +65,7 @@ def remove_double_quotes_and_map(characteristics: List[str]) -> (List[str], Dict
     cleaned_characteristics = []
     mapping = {}
     for char in characteristics:
-        cleaned_char = char.replace('"', '')
+        cleaned_char = char.lower().replace('"', '').replace("'", '').replace(",", '').replace(";", '')
         mapping[char] = cleaned_char
         cleaned_characteristics.append(cleaned_char)
     return cleaned_characteristics, mapping
@@ -81,15 +82,13 @@ def preprocessing_and_map(characteristics: List[str]) -> (List[str], Dict[str, s
 async def process_message(sem, message, yandex_gpt):
     try:
         async with sem:
-            result = await yandex_gpt.get_async_completion(messages=message, temperature=0.0, max_tokens=8000,
-                                                           timeout=200)
-            # result = yandex_gpt.get_sync_completion(messages=message, temperature=0.0, max_tokens=8000)
-            print('/n', message)
-            print(result)
+            await asyncio.sleep(0.5)
+            result = yandex_gpt.get_sync_completion(messages=message, temperature=0.0, max_tokens=8000)
+            print("\n", result)
             return result
     except Exception as e:
         print(e)
-        return ' '
+        return ""
 
 
 # Убираем специальные символы из текста
@@ -99,35 +98,33 @@ def filter_special_symbols(text: str) -> str:
 
 # Получаем ответ от модели для конкретного текста и набора характеристик
 async def extract_characteristics_from_text(text: str, characteristics: List[str]) -> List[str]:
-    characteristics = [f"'{item}'" for item in characteristics]
-
-    # yandex_gpt = load_model(YANDEX_GPT_MODEL_TYPE, YANDEX_GPT_CATALOG_ID, YANDEX_GPT_API_KEY)
     yandex_gpt = load_model()
 
-    text_batch_size = 5000
+    text_batch_size = 10000
     characteristics_batch_size = 3
 
     text_batches = split_text_to_batches(text, text_batch_size)
     characteristics_batches = split_characteristics_to_batches(characteristics, characteristics_batch_size)
     messages = []
 
-    for text_batch in text_batches:
-        for characteristics_batch in characteristics_batches:
+    for text_batch in text_batches[:]:
+        for characteristics_batch in characteristics_batches[:]:
             messages.append([
                 {'role': 'system', 'text': (
-                    f'Список необходимых характеристик: {", ".join(characteristics_batch)}. '
-                    'Из отрывка текста выдели упоминаемые им значения характеристик, если они присутствуют в списке необходимых характеристик. '
-                    'Если информации о характеристике нет, возвращай None. '
-                    'Ответ дай в формате JSON. Ключ - название характеристики, значение - значение характеристики. '
-                    'Если отрывок не содержит необходимой информации, возвращай только словарь с None для каждой характеристики без дополнительных комментариев.'
+                    'Ты - технический эксперт в ноутбуках. '
+                    f'Список возможных характеристик: {"; ".join([f"\"{characteristic}\"" for characteristic in characteristics_batch])}. '
+                    'Из отрывка текстового описания ноутбука выдели упоминаемые характеристики, если они присутствуют в списке возможных характеристик. '
+                    "Ищи не только прямые упоминания характеристик, но и косвенные признаки их наличия. "
+                    "Для ответа используй точные формулировки из списка возможных характеристик. "
+                    'Ответ дай в формате JSON без дополнительных комментариев, используя все характеристики из списка возможных характеристик: {"характеристика1": "значение1", "характеристика2": "значение2", ...}". '
+                    'Если информация о характеристике отсутствует в тексте, в качестве значения используй "Нет данных".'
                 )},
                 {'role': 'user', 'text': (
-                    f'Отрывок текста: "{filter_special_symbols(text_batch)}".'
+                    f'Отрывок текста описания ноутбука: "{filter_special_symbols(text_batch)}".'
                 )}
             ])
 
-    sem = asyncio.Semaphore(10)
-    # sem = asyncio.Semaphore(1)
+    sem = asyncio.Semaphore(1)
     tasks = [process_message(sem, message, yandex_gpt) for message in messages]
     results = await asyncio.gather(*tasks)
 
@@ -135,23 +132,47 @@ async def extract_characteristics_from_text(text: str, characteristics: List[str
 
 
 # Объединяем словари в один
-def merge_dicts(list_of_dicts: List[Dict]) -> Dict:
-    merged_dict = {}
-    for d in list_of_dicts:
-        merged_dict.update(d)
-    return merged_dict
+def merge_dicts(dicts: List[Dict]) -> Dict:
+    # Создаем словарь для хранения списков значений по каждому ключу
+    combined_dict = defaultdict(list)
+
+    # Собираем все значения для каждого ключа из списка словарей
+    for d in dicts:
+        for key, value in d.items():
+            combined_dict[key].append(value)
+
+    # Создаем итоговый словарь, выбирая наиболее частое значение для каждого ключа
+    result_dict = {}
+    for key, values in combined_dict.items():
+        most_common_value, _ = Counter(values).most_common(1)[0]
+        result_dict[key] = most_common_value
+
+    return result_dict
+
+
+def str_to_dict(string: str) -> Dict:
+    string = string.replace('"', '').replace("'", '').replace("{", "").replace("}", "").replace("\n", " ")
+
+    splited_string = string.split(", ")
+
+    res_dict = {}
+    for item in splited_string:
+        key, value = item.split(": ")
+        res_dict[key] = value
+
+    return res_dict
 
 
 # Обрабатываем ответ модели и приводим к нужному формату словаря
 async def process_model_answer(text: str, characteristics: List[str]) -> Dict:
     # Получаем ответ от модели для конкретного текста и набора характеристик
-    answer = await extract_characteristics_from_text(text, characteristics)
-    # Фильтруем пустые ответы
-    filtered_list = [item for item in answer if item != ' ']
+    answer: List[str] = await extract_characteristics_from_text(text, characteristics)
     # Преобразуем строковые представления словарей в настоящие словари
-    filtered_list = [eval(item) for item in filtered_list]
+    dicts = [str_to_dict(x) for x in answer if x]
+    print(dicts)
     # Преобразуем строковые представления словарей в настоящие словари
-    final_dict = merge_dicts(filtered_list)
+    final_dict = merge_dicts(dicts)
+    print(final_dict)
     return final_dict
 
 
@@ -217,9 +238,11 @@ async def get_product_characteristics_from_sources_single(product_texts_from_sou
 
     # Читаем Excel-файл и собираем уникальные характеристики в список
     characteristics = collect_characteristics_list(path_characteristics)
+    # print(characteristics)
 
     # Предобрабатываем характеристики и создаем словарь замены старых названий на новые
     characteristics, mapping = preprocessing_and_map(characteristics)
+    # print(mapping)
 
     # Получаем ответ модели для текста и характеристик
     answer = await process_model_answer(text, characteristics)
