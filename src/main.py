@@ -273,7 +273,8 @@ async def main_task1():
             else:
                 st.warning("Сначала выполните обработку данных.")
 
-async def main_task2():
+# async def main_task2():
+def main_task2():
     # Разделение приложения на разделы с помощью заголовков
     st.title("AI Product Hack (Кейс 4)")
     product_input_interface()
@@ -340,10 +341,10 @@ def run_main_menu():
         case "Task 2":
             # st.write("Task 2")
 
-            nest_asyncio.apply()
-            asyncio.run(main_task2())
+            # nest_asyncio.apply()
+            # asyncio.run(main_task2())
 
-            # main_task2()
+            main_task2()
         case "Info":
             pass
         # case _:
