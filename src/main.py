@@ -34,11 +34,19 @@ if "info_model" not in st.session_state:
 
 
 # Значения по умолчанию
+# default_product_type = "ноутбук"
+# default_brand_name = "AQUARIUS"
+# default_model_name = "CMP NS483 (Исп.2)"
+# default_part_number = "NS4831524116Q151E90NT2NNNN2"
+# default_links = "https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+
 default_product_type = "ноутбук"
-default_brand_name = "AQUARIUS"
-default_model_name = "CMP NS483 (Исп.2)"
-default_part_number = "NS4831524116Q151E90NT2NNNN2"
-default_links = "https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+default_brand_name = "Lenovo"
+default_model_name = "Lenovo IdeaPad 1 15IGL7 82V700EMUE"
+default_part_number = "82V700EMUE"
+# default_links = "https://www.citilink.ru/product/noutbuk-lenovo-ideapad-1-15igl7-82v700emue-15-6-2023-tn-intel-celeron-1983406/"
+default_links = "https://novosibirsk.e2e4online.ru/catalog/item/noutbuk-15-6-lenovo-ideapad-1-15igl7-seryy-82v700emue-1237171/"
+
 
 
 async def async_search_and_rate(product_info):
@@ -162,7 +170,29 @@ def product_input_interface():
 
                 product_brand = brand_name
                 product_name = model_name
-                loop = asyncio.get_event_loop()
+                 
+                try:
+                    if links:
+                        links_list = [link.strip() for link in links.split('\n') if link.strip()]
+                        for one_link in links_list:
+                            print("links", type(one_link), one_link)
+                            test_source_link_html = SourceLink(
+                                link=one_link, 
+                                confidence_rate=1)
+
+                            text_info = get_source_links_single(test_source_link_html)
+                            if text_info["html_text"]:
+                                print("text_info.html_text  ", text_info["html_text"])
+                                data_file_content.append(text_info["html_text"])
+                            if text_info["pdf_texts"]:
+                                print("text_info.pdf_texts  ")
+                                data_file_content.append(text_info["pdf_texts"])
+                except Exception as e:
+                    logging.error(f"Ошибка: {str(e)}")
+                    st.error(f"Ошибка: {str(e)}")
+
+
+                # loop = asyncio.get_event_loop()
 
                 product_description = get_product_description(
                     product_type, product_brand, product_name, characteristics, data_file_content)
