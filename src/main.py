@@ -58,13 +58,12 @@ async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
 
 
-
 def product_input_interface():
     # if "summary" not in st.session_state:
     #     st.session_state["summary"] = None
 
     with st.form(key='product_form'):
-        
+
         # product_type = st.text_input('Тип продукта')
         # brand_name = st.text_input('Название бренда')
         # model_name = st.text_input('Модель (как она написана официальным производителем)')
@@ -76,27 +75,30 @@ def product_input_interface():
         # # Набор ссылок на известные ресурсы про товар в интернете
         # links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
 
-
         # Поля с заданными значениями по умолчанию
-        product_type = st.text_input('Тип продукта', value=default_product_type)
+        product_type = st.text_input(
+            'Тип продукта', value=default_product_type)
         brand_name = st.text_input('Название бренда', value=default_brand_name)
-        model_name = st.text_input('Модель (как она написана официальным производителем)', value=default_model_name)
-        part_number = st.text_input('Парт-номер производителя (если есть)', value=default_part_number)
+        model_name = st.text_input(
+            'Модель (как она написана официальным производителем)', value=default_model_name)
+        part_number = st.text_input(
+            'Парт-номер производителя (если есть)', value=default_part_number)
         # Поле для загрузки JSON файла с характеристиками товара
-        characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
+        characteristics_json = st.file_uploader(
+            'Характеристики товара', type=['json'])
         # Набор ссылок на известные ресурсы про товар в интернете
-        links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете', value=default_links)
+        links = st.text_area(
+            'Набор ссылок на известные ресурсы про товар в интернете', value=default_links)
 
         # PDF с маркетинговыми материалами и инструкцией пользователя
-        data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
-        
-
+        data_files = st.file_uploader(
+            'PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
 
         submit_button_task2 = st.form_submit_button(label='Запустить')
-        show_downloaded_files_button_2 = st.form_submit_button(label='Показать введенные данные')
+        show_downloaded_files_button_2 = st.form_submit_button(
+            label='Показать введенные данные')
         # load_test_data_button = st.form_submit_button(label='Подгрузить тестовые данные')
         # Место для вывода сообщений
-        
 
         characteristics = {}
 
@@ -117,7 +119,6 @@ def product_input_interface():
             if characteristics_json is not None:
                 st.write("**Характеристики товара:**")
                 st.json(characteristics)
-            
 
             # if data_files:
             #     try:
@@ -143,7 +144,6 @@ def product_input_interface():
             #     except Exception as e:
             #         logging.error(f"Ошибка загрузки фаилов: {str(e)}")
             #         st.error(f"Ошибка: {str(e)}")
-
 
     # Раздел для отображения результатов
     with st.expander("Результаты задача2"):
@@ -172,12 +172,12 @@ def product_input_interface():
                         # print("remove data files")
                         # os.remove(temp_pdf_path)
 
-
                 product_brand = brand_name
                 product_name = model_name
                 loop = asyncio.get_event_loop()
 
-                product_description = get_product_description(product_type, product_brand, product_name, characteristics, data_file_content)
+                product_description = get_product_description(
+                    product_type, product_brand, product_name, characteristics, data_file_content)
                 print("product_description  !!!", product_description)
 
                 st.session_state["product_description"] = product_description
@@ -187,9 +187,9 @@ def product_input_interface():
                 # print("summary", summary)
                 st.session_state["summary"] = summary
 
-                
                 st.session_state["results_ready_2t_task"] = True
-                st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
+                st.success(
+                    "Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
                 st.error("Превышено время ожидания Yandex GPT.")
@@ -209,14 +209,15 @@ def product_input_interface():
             # json_data = json.dumps(st.session_state["summary"], indent=4)
             # Для более корректное отображение json фаила в редакторах
             try:
-                json_data = json.dumps(st.session_state["summary"], indent=4, ensure_ascii=False)
+                json_data = json.dumps(
+                    st.session_state["summary"], indent=4, ensure_ascii=False)
             except Exception as e:
                 json_data = json.dumps(st.session_state["summary"], indent=4)
                 logging.error(f"Ошибка: {str(e)}")
                 st.error(f"Ошибка: {str(e)}")
 
-            
-            filename = st.text_input("Введите имя файла:", value="results_task2.json")
+            filename = st.text_input(
+                "Введите имя файла:", value="results_task2.json")
 
             # Конвертация данных в JSON строку
             json_bytes = io.BytesIO(json_data.encode('utf-8'))
@@ -226,7 +227,7 @@ def product_input_interface():
                 data=json_bytes,
                 file_name=filename,
                 mime='application/json'
-                )
+            )
         else:
             st.warning("Идет обработка данных, подождите.")
 
@@ -242,14 +243,14 @@ async def main_task1():
         # part_number = st.text_input("Парт-номер производителя (опционально)")
         # submit_button = st.form_submit_button("Запустить")
 
-
         brand_name = st.text_input("Название бренда", value="AQUARIUS")
-        model_name = st.text_input("Название модели", value="CMP NS483 (Исп.2)")
-        part_number = st.text_input("Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
+        model_name = st.text_input(
+            "Название модели", value="CMP NS483 (Исп.2)")
+        part_number = st.text_input(
+            "Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
         submit_button = st.form_submit_button("Запустить")
 
-
-        # # Для проверки 
+        # # Для проверки
         # brand_name = "TCL"
         # model_name = "20 SE"
         # part_number = "T671H-2ALCRU12"
@@ -276,7 +277,8 @@ async def main_task1():
                 # link = await search_and_rate(product_info)
                 # link = asyncio.get_event_loop().run_until_complete(search_and_rate(product_info))
                 loop = asyncio.get_event_loop()
-                links = loop.run_until_complete(async_search_and_rate(product_info))
+                links = loop.run_until_complete(
+                    async_search_and_rate(product_info))
                 # print("begin get_source_links_single(link)")
                 text_info = get_source_links_single(links[0])
                 # text_info = get_source_links_single(link)
@@ -284,7 +286,8 @@ async def main_task1():
                 print("text_info ", text_info)
 
                 # info_model = generate_info_model(text_info)
-                info_model = loop.run_until_complete(get_product_characteristics_from_sources_single([text_info]))
+                info_model = loop.run_until_complete(
+                    get_product_characteristics_from_sources_single([text_info]))
 
                 # st.json(info_model)
 
@@ -292,7 +295,8 @@ async def main_task1():
 
                 st.session_state["info_model"] = info_model
                 st.session_state["results_ready_1_task"] = True
-                st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
+                st.success(
+                    "Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
                 st.error("Превышено время ожидания Yandex GPT.")
@@ -310,13 +314,16 @@ async def main_task1():
         # Кнопка сохранения
         if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
             try:
-                json_data = json.dumps(st.session_state["info_model"], indent=4, ensure_ascii=False)
+                json_data = json.dumps(
+                    st.session_state["info_model"], indent=4, ensure_ascii=False)
             except Exception as e:
-                json_data = json.dumps(st.session_state["info_model"], indent=4)
+                json_data = json.dumps(
+                    st.session_state["info_model"], indent=4)
                 logging.error(f"Ошибка: {str(e)}")
                 st.error(f"Ошибка: {str(e)}")
 
-            filename = st.text_input("Введите имя файла:", value="results_task1.json")
+            filename = st.text_input(
+                "Введите имя файла:", value="results_task1.json")
 
             with open(filename, "w") as f:
                 f.write(json_data)
@@ -326,6 +333,8 @@ async def main_task1():
             st.warning("Идет обработка данных, подождите.")
 
 # async def main_task2():
+
+
 def main_task2():
     st.title("AI Product Hack (Кейс 4)")
     product_input_interface()

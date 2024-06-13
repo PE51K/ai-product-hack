@@ -191,7 +191,6 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
             source=source_link
         )
 
-    
     return text_info
 
 
