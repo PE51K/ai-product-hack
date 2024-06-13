@@ -129,7 +129,7 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
         if link.lower().endswith('.pdf'):
             # Handle link as a PDF directly
             pdf_url = link
-            pdf_path = download_file(pdf_url, 'downloads', 60)
+            pdf_path = download_file(pdf_url, 'downloads', 120)
             pdf_text = extract_text_from_pdf(pdf_path)
             text_info = TextInfoFromSource(
               html_text=None,  # No HTML content for a direct PDF link
@@ -171,7 +171,7 @@ def get_source_links_single(source_link: SourceLink) -> TextInfoFromSource:
 
 
                     # Download the PDF file and save it to the specified directory
-                    pdf_path = download_file(pdf_url, 'downloads', 60)
+                    pdf_path = download_file(pdf_url, 'downloads', 120)
                     # Extract text from the downloaded PDF file
                     pdf_text = extract_text_from_pdf(pdf_path)
                     pdf_texts.append(pdf_text)
