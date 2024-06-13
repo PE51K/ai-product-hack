@@ -182,10 +182,10 @@ def product_input_interface():
 
                             text_info = get_source_links_single(test_source_link_html)
                             if text_info["html_text"]:
-                                print("text_info.html_text  ", text_info["html_text"])
+                                # print("text_info.html_text  ", text_info["html_text"])
                                 data_file_content.append(text_info["html_text"])
                             if text_info["pdf_texts"]:
-                                print("text_info.pdf_texts  ")
+                                # print("text_info.pdf_texts  ")
                                 data_file_content.append(text_info["pdf_texts"])
                 except Exception as e:
                     logging.error(f"Ошибка: {str(e)}")
