@@ -1,14 +1,19 @@
-FROM python:3.9-slim
+FROM python:3.12.2
 
+# Устанавливаем рабочую директорию в контейнере
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    software-properties-common \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+# Копируем файл requirements.txt в рабочую директорию контейнера
+COPY requirements.txt .
 
-RUN git clone https://github.com/streamlit/streamlit-example.git .
+# Устанавливаем зависимости, указанные в requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN pip3 install -r requirements.txt
+# Копируем все файлы из текущей директории на хосте в рабочую директорию контейнера
+COPY . .
+
+# Открываем порт 8501 для Streamlit
+EXPOSE 8501
+
+# Команда для запуска Streamlit приложения
+CMD ["streamlit", "run", "src/main.py"]

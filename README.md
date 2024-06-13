@@ -182,6 +182,41 @@ def get_final_product_characteristics(product_characteristics_from_sources: List
 
 ### Установка
 
+## Требования
+
+- Docker должен быть установлен на вашей машине. [Инструкция по установке Docker](https://docs.docker.com/get-docker/)
+
+#### Построение Docker образа
+
+1. Откройте терминал и перейдите в директорию проекта `ai-product-hack`:
+    ```
+    cd path/to/ai-product-hack
+    ```
+
+2. Постройте Docker образ, используя команду:
+    ```
+    docker build -t my-streamlit-app .
+    ```
+
+## Запуск Docker контейнера
+
+1. Запустите контейнер, используя команду:
+    ```
+    docker run -p 8501:8501 my-streamlit-app
+    ```
+
+Теперь ваше Streamlit приложение доступно по адресу `http://localhost:8501`.
+
+## Основные команды в Dockerfile
+
+- `FROM python:3.12.2`: Использует официальный образ Python 3.12.2 как базовый.
+- `WORKDIR /app`: Устанавливает рабочую директорию внутри контейнера.
+- `COPY requirements.txt .`: Копирует файл `requirements.txt` в контейнер.
+- `RUN pip install --no-cache-dir -r requirements.txt`: Устанавливает зависимости.
+- `COPY . .`: Копирует все файлы проекта в контейнер.
+- `EXPOSE 8501`: Открывает порт 8501 для доступа к приложению.
+- `CMD ["streamlit", "run", "src/main.py"]`: Запускает Streamlit приложение.
+
 1. ... (команды для установки)
 2. ... (инструкции)
 
