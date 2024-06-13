@@ -117,7 +117,6 @@ def product_input_interface():
             if characteristics_json is not None:
                 st.write("**Характеристики товара:**")
                 st.json(characteristics)
-                # st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
             
 
             # if data_files:
@@ -201,18 +200,22 @@ def product_input_interface():
 
         # Кнопка для отображения результатов
         if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
-            if st.session_state["results_ready_2t_task"] == True:
-                print("summary ", st.session_state["summary"])
-            else:
-                st.warning("Идет обработка данных, подождите.")
+            print("summary ", st.session_state["summary"])
+        else:
+            st.warning("Идет обработка данных, подождите.")
 
         if st.session_state["results_ready_2t_task"] == True:
             # Преобразуйте info_model в JSON
             # json_data = json.dumps(st.session_state["summary"], indent=4)
             # Для более корректное отображение json фаила в редакторах
-            json_data = json.dumps(st.session_state["summary"], indent=4, ensure_ascii=False)
-            
+            try:
+                json_data = json.dumps(st.session_state["summary"], indent=4, ensure_ascii=False)
+            except Exception as e:
+                json_data = json.dumps(st.session_state["summary"], indent=4)
+                logging.error(f"Ошибка: {str(e)}")
+                st.error(f"Ошибка: {str(e)}")
 
+            
             filename = st.text_input("Введите имя файла:", value="results_task2.json")
 
             # Конвертация данных в JSON строку
@@ -226,21 +229,6 @@ def product_input_interface():
                 )
         else:
             st.warning("Идет обработка данных, подождите.")
-
-
-        # if save_button:
-        #     if "summary" in st.session_state and st.session_state["summary"] is not None:
-        #         # Сохранить summary в JSON файл
-        #         json_filename = "product_summary.json"
-        #         with open(json_filename, 'w') as json_file:
-        #             json.dump({"summary": st.session_state["summary"]}, json_file, indent=4)
-                
-        #         st.success(f"Summary успешно сохранен в {json_filename}")
-        #         # Вывод успешного сообщения
-        #         message_placeholder.success(f"Итоговые данные успешно сохранены в {json_filename}")
-        #     else:
-        #         st.error("Summary еще не вычислен. Пожалуйста, введите данные и нажмите 'Показать введенные данные' перед сохранением.")
-        #         message_placeholder.error("Итоговые данные еще не вычислены. Пожалуйста, подождите. Убедитесь, что ввели корректные данные.")
 
 
 async def main_task1():
@@ -315,25 +303,27 @@ async def main_task1():
 
         # Кнопка для отображения результатов
         if st.session_state["results_ready_1_task"] == True and st.button("Показать результаты"):
-            if st.session_state["results_ready_1_task"]:
-                st.json(st.session_state["info_model"])
-            else:
-                st.warning("Идет обработка данных, подождите.")
+            st.json(st.session_state["info_model"])
+        else:
+            st.warning("Идет обработка данных, подождите.")
 
         # Кнопка сохранения
         if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
-            if st.session_state["results_ready_1_task"]:
-                # Преобразуйте info_model в JSON
+            try:
+                json_data = json.dumps(st.session_state["info_model"], indent=4, ensure_ascii=False)
+            except Exception as e:
                 json_data = json.dumps(st.session_state["info_model"], indent=4)
+                logging.error(f"Ошибка: {str(e)}")
+                st.error(f"Ошибка: {str(e)}")
 
-                filename = st.text_input("Введите имя файла:", value="results_task1.json")
+            filename = st.text_input("Введите имя файла:", value="results_task1.json")
 
-                with open(filename, "w") as f:
-                    f.write(json_data)
+            with open(filename, "w") as f:
+                f.write(json_data)
 
-                st.success(f"Результаты успешно сохранены в файл '{filename}'.")
-            else:
-                st.warning("Идет обработка данных, подождите.")
+            st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+        else:
+            st.warning("Идет обработка данных, подождите.")
 
 # async def main_task2():
 def main_task2():
