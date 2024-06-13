@@ -38,6 +38,8 @@ logging.basicConfig(filename='app.log', level=logging.INFO)
 # Хранение контекста
 if "summary" not in st.session_state:
     st.session_state["summary"] = None
+if "product_description" not in st.session_state:
+    st.session_state["product_description"] = None
 if "results_ready_1_task" not in st.session_state:
     st.session_state["results_ready_1_task"] = False
 if "results_ready_2t_task" not in st.session_state:
@@ -171,6 +173,9 @@ def product_input_interface():
                         # st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
                         # print("remove data files")
                         # os.remove(temp_pdf_path)
+                
+                # for elem1 in data_file_content:
+                #     print(" data_file_content  ", data_file_content)
 
                 product_brand = brand_name
                 product_name = model_name
@@ -202,7 +207,9 @@ def product_input_interface():
         if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
 
             # st.json(st.session_state["summary"])
-            st.text_area(f"Результаты: ", value=st.session_state["summary"], height=300)
+            st.text_area(f"Саммари маркетингового описания товара: ", value=st.session_state["summary"], height=300)
+            st.text_area(f"Описание товара: ", value=st.session_state["product_description"], height=300)
+            
         else:
             st.warning("Идет обработка данных, подождите.")
 
