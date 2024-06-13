@@ -45,18 +45,18 @@ if "info_model" not in st.session_state:
     st.session_state["info_model"] = None
 
 
-
-
-
-async def async_search_and_rate(product_info):
-    return await search_and_rate(product_info)
-
 # Значения по умолчанию
 default_product_type = "ноутбук"
 default_brand_name = "AQUARIUS"
 default_model_name = "CMP NS483 (Исп.2)"
 default_part_number = "NS4831524116Q151E90NT2NNNN2"
 default_links = "https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+
+
+async def async_search_and_rate(product_info):
+    return await search_and_rate(product_info)
+
+
 
 def product_input_interface():
     # if "summary" not in st.session_state:
@@ -81,39 +81,26 @@ def product_input_interface():
         brand_name = st.text_input('Название бренда', value=default_brand_name)
         model_name = st.text_input('Модель (как она написана официальным производителем)', value=default_model_name)
         part_number = st.text_input('Парт-номер производителя (если есть)', value=default_part_number)
-
         # Поле для загрузки JSON файла с характеристиками товара
         characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
-
         # Набор ссылок на известные ресурсы про товар в интернете
         links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете', value=default_links)
 
-
         # PDF с маркетинговыми материалами и инструкцией пользователя
         data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
-        # submit_button = st.form_submit_button("Запустить")
-        submit_button = st.form_submit_button(label='Запустить')
-        save_button = st.form_submit_button(label='Сохранить итоговые данные в JSON')
-        show_downloaded_files_button = st.form_submit_button(label='Показать введенные данные')
+        
+
+
+        submit_button_task2 = st.form_submit_button(label='Запустить')
+        show_downloaded_files_button_2 = st.form_submit_button(label='Показать введенные данные')
         # load_test_data_button = st.form_submit_button(label='Подгрузить тестовые данные')
         # Место для вывода сообщений
-        message_placeholder = st.empty()
-
-        # if load_test_data_button:
-        #     # Примерные данные для тестирования УДАЛИТЬ!!!
-        #     product_type = "ноутбук"
-        #     brand_name="AQUARIUS",
-        #     model_name="CMP NS483 (Исп.2)",
-        #     part_number="NS4831524116Q151E90NT2NNNN2"
-        #     default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
-        #     characteristics = laptop_characteristics_json
-
-        #     # st.success("Тестовые данные подгружены")
-        #     message_placeholder.error("Тестовые данные подгружены")
+        
 
         characteristics = {}
+
         # if st.button('Показать введенные данные'):
-        if show_downloaded_files_button:
+        if show_downloaded_files_button_2:
             if characteristics_json is not None:
                 print("characteristics_json", characteristics_json)
                 characteristics = json.load(characteristics_json)
@@ -125,38 +112,40 @@ def product_input_interface():
             st.write(f"**Название бренда:** {brand_name}")
             st.write(f"**Модель:** {model_name}")
             st.write(f"**Парт-номер производителя:** {part_number}")
-            st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
             st.write(f"**Ссылки на известные ресурсы:**\n{links}")
+            if characteristics_json is not None:
+                st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
+            
 
-        if data_files:
-            try:
-                st.write("**Загруженные файлы:**")
-                for data_file in data_files:
-                    st.write(data_file.name)
-                    # Отобразить содержимое текстовых файлов
-                    if data_file.type == "text/plain":
-                        content = data_file.read().decode("utf-8")
-                        # st.text(content)
-                        st.text_area(f"Содержимое txt файла {data_file.name}", value=content, height=300)
-                    elif data_file.type == "application/pdf":
-                        pdf_bytes = data_file.read()
-                        # Создаем временный файл
-                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
-                            temp_pdf.write(pdf_bytes)
-                            temp_pdf_path = temp_pdf.name
-                        extracted_text = extract_text_from_pdf(temp_pdf_path)
-                        # print(extracted_text)
-                        st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
-                        # print("remove data files")
-                        # os.remove(temp_pdf_path)
-            except Exception as e:
-                logging.error(f"Ошибка загрузки фаилов: {str(e)}")
-                st.error(f"Ошибка: {str(e)}")
+            # if data_files:
+            #     try:
+            #         st.write("**Загруженные файлы:**")
+            #         for data_file in data_files:
+            #             st.write(data_file.name)
+            #             # Отобразить содержимое текстовых файлов
+            #             if data_file.type == "text/plain":
+            #                 content = data_file.read().decode("utf-8")
+            #                 # st.text(content)
+            #                 st.text_area(f"Содержимое txt файла {data_file.name}", value=content, height=300)
+            #             elif data_file.type == "application/pdf":
+            #                 pdf_bytes = data_file.read()
+            #                 # Создаем временный файл
+            #                 with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+            #                     temp_pdf.write(pdf_bytes)
+            #                     temp_pdf_path = temp_pdf.name
+            #                 extracted_text = extract_text_from_pdf(temp_pdf_path)
+            #                 # print(extracted_text)
+            #                 st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
+            #                 # print("remove data files")
+            #                 # os.remove(temp_pdf_path)
+            #     except Exception as e:
+            #         logging.error(f"Ошибка загрузки фаилов: {str(e)}")
+            #         st.error(f"Ошибка: {str(e)}")
 
 
     # Раздел для отображения результатов
-    with st.expander("Результаты"):
-        if submit_button:
+    with st.expander("Результаты задача2"):
+        if submit_button_task2:
             try:
                 data_file_content = []
 
@@ -178,8 +167,8 @@ def product_input_interface():
                         data_file_content.append(extracted_text)
                         # print(extracted_text)
                         st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
-                        print("remove data files")
-                        os.remove(temp_pdf_path)
+                        # print("remove data files")
+                        # os.remove(temp_pdf_path)
 
 
                 product_brand = brand_name
@@ -192,7 +181,7 @@ def product_input_interface():
                 # print("product_description  !!!", product_description)
 
                 st.session_state["product_description"] = product_description
-                print("product_description  !!!", st.session_state["product_description"])
+                # print("product_description  !!!", st.session_state["product_description"])
 
                 summary = get_summary_from_description(product_description)
                 # print("summary", summary)
@@ -210,25 +199,44 @@ def product_input_interface():
                 st.error(f"Ошибка: {str(e)}")
 
         # Кнопка для отображения результатов
-        if st.button("Показать результаты"):
-            if st.session_state.get("results_ready_2t_task", False):
+        if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
+            if st.session_state["results_ready_2t_task"] == True:
                 print("summary ", st.session_state["summary"])
             else:
                 st.warning("Идет обработка данных, подождите.")
 
-        if save_button:
-            if "summary" in st.session_state and st.session_state["summary"] is not None:
-                # Сохранить summary в JSON файл
-                json_filename = "product_summary.json"
-                with open(json_filename, 'w') as json_file:
-                    json.dump({"summary": st.session_state["summary"]}, json_file, indent=4)
+        if st.session_state["results_ready_2t_task"] == True and st.button("Сохранить результаты задача 2"):
+            # Преобразуйте info_model в JSON
+            json_data = json.dumps(st.session_state["summary"], indent=4)
+
+            # Отображение имени файла для сохранения
+            filename = st.text_input("Введите имя файла:", value="results_task2.json")
+
+            # Сохранение JSON в файл
+            with open(filename, "w") as f:
+                f.write(json_data)
+
+            # Отображение сообщения об успешном сохранении
+            st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+        else:
+            st.warning("Идет обработка данных, подождите.")
+
+
+
+
+        # if save_button:
+        #     if "summary" in st.session_state and st.session_state["summary"] is not None:
+        #         # Сохранить summary в JSON файл
+        #         json_filename = "product_summary.json"
+        #         with open(json_filename, 'w') as json_file:
+        #             json.dump({"summary": st.session_state["summary"]}, json_file, indent=4)
                 
-                st.success(f"Summary успешно сохранен в {json_filename}")
-                # Вывод успешного сообщения
-                message_placeholder.success(f"Итоговые данные успешно сохранены в {json_filename}")
-            else:
-                st.error("Summary еще не вычислен. Пожалуйста, введите данные и нажмите 'Показать введенные данные' перед сохранением.")
-                message_placeholder.error("Итоговые данные еще не вычислены. Пожалуйста, подождите. Убедитесь, что ввели корректные данные.")
+        #         st.success(f"Summary успешно сохранен в {json_filename}")
+        #         # Вывод успешного сообщения
+        #         message_placeholder.success(f"Итоговые данные успешно сохранены в {json_filename}")
+        #     else:
+        #         st.error("Summary еще не вычислен. Пожалуйста, введите данные и нажмите 'Показать введенные данные' перед сохранением.")
+        #         message_placeholder.error("Итоговые данные еще не вычислены. Пожалуйста, подождите. Убедитесь, что ввели корректные данные.")
 
 
 async def main_task1():
@@ -326,21 +334,6 @@ async def main_task1():
                 st.success(f"Результаты успешно сохранены в файл '{filename}'.")
             else:
                 st.warning("Идет обработка данных, подождите.")
-    
-    # # if st.session_state["results_ready_1_task"]:
-    #     save_button_task1 = st.button("Сохранить итоговые данные в JSON")
-
-    # save_button_task1 = st.button("Сохранить итоговые данные в JSON")
-
-    # if save_button_task1 and st.session_state["info_model"] is not None:
-    #     json_filename = "task1.json"
-    #     with open(json_filename, 'w') as json_file:
-    #         json.dump({"info_mode": st.session_state["info_model"]}, json_file, indent=4)
-        
-    #     # Вывод успешного сообщения
-    #     st.success(f"Итоговые данные успешно сохранены в {json_filename}")
-    # else:
-    #     st.error("Итоговые данные еще не вычислены.")
 
 # async def main_task2():
 def main_task2():
