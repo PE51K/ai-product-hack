@@ -20,21 +20,6 @@ from test_data import laptop_characteristics_json
 
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
-
-# product_info = ProductInfo(
-#     brand_name="ACER",
-#     model_name="CC715-91P-X7V8",
-#     part_number="NX.C5FER.001"
-# )
-
-# source_link = SourceLink(link="https://example.com", confidence_rate=0.8)
-
-# text_info = TextInfoFromSource(
-#     html_text="<p>This is some text from the source.</p>",
-#     pdf_texts=["Text from PDF 1", "Text from PDF 2"],
-#     source=source_link,
-# )
-
 # Хранение контекста
 if "summary" not in st.session_state:
     st.session_state["summary"] = None
@@ -61,8 +46,6 @@ async def async_search_and_rate(product_info):
 
 
 def product_input_interface():
-    # if "summary" not in st.session_state:
-    #     st.session_state["summary"] = None
 
     with st.form(key='product_form'):
 
@@ -173,7 +156,7 @@ def product_input_interface():
                         # st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
                         # print("remove data files")
                         # os.remove(temp_pdf_path)
-                
+
                 # for elem1 in data_file_content:
                 #     print(" data_file_content  ", data_file_content)
 
@@ -206,9 +189,11 @@ def product_input_interface():
         # Кнопка для отображения результатов
         if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
             # st.json(st.session_state["summary"])
-            st.text_area(f"Саммари маркетингового описания товара: ", value=st.session_state["summary"], height=300)
-            st.text_area(f"Описание товара: ", value=st.session_state["product_description"], height=300)
-            
+            st.text_area(f"Саммари маркетингового описания товара: ",
+                         value=st.session_state["summary"], height=300)
+            st.text_area(f"Описание товара: ",
+                         value=st.session_state["product_description"], height=300)
+
         else:
             st.warning("Идет обработка данных, подождите.")
 
@@ -224,7 +209,6 @@ def product_input_interface():
             filename = st.text_input(
                 "Введите имя файла:", value="results_task2.json")
 
-            # Конвертация данных в JSON строку
             json_bytes = io.BytesIO(json_data.encode('utf-8'))
 
             st.download_button(
@@ -238,15 +222,12 @@ def product_input_interface():
 
 
 async def main_task1():
-    # Разделение приложения на разделы с помощью заголовков
     st.title("AI Product Hack (Кейс 4)")
 
-    # Раздел для ввода данных пользователем
     with st.form(key="data_input"):
         # brand_name = st.text_input("Название бренда")
         # model_name = st.text_input("Название модели")
         # part_number = st.text_input("Парт-номер производителя (опционально)")
-        # submit_button = st.form_submit_button("Запустить")
 
         # # 1 вариант с настройками по умолчанию для теста
         # brand_name = st.text_input("Название бренда", value="AQUARIUS")
@@ -254,7 +235,6 @@ async def main_task1():
         #     "Название модели", value="CMP NS483 (Исп.2)")
         # part_number = st.text_input(
         #     "Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
-        # submit_button = st.form_submit_button("Запустить")
 
         # 2 вариант с настройками по умолчанию для теста
         brand_name = st.text_input("Название бренда", value="Lenovo")
@@ -262,6 +242,7 @@ async def main_task1():
             "Название модели", value="Lenovo IdeaPad 1 15IGL7 82V700EMUE")
         part_number = st.text_input(
             "Парт-номер производителя (опционально)", value="82V700EMUE")
+
         submit_button = st.form_submit_button("Запустить")
 
         # # Для проверки
@@ -324,7 +305,6 @@ async def main_task1():
         else:
             st.warning("Идет обработка данных, подождите.")
 
-
         if st.session_state["results_ready_1_task"] == True:
             try:
                 json_data = json.dumps(
@@ -338,7 +318,6 @@ async def main_task1():
             filename = st.text_input(
                 "Введите имя файла:", value="results_task1.json")
 
-            # Конвертация данных в JSON строку
             json_bytes = io.BytesIO(json_data.encode('utf-8'))
 
             st.download_button(
@@ -349,7 +328,6 @@ async def main_task1():
             )
 
             st.success(f"Результаты успешно сохранены в файл '{filename}'.")
-
 
         # Кнопка сохранения
         # if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
@@ -385,9 +363,7 @@ def run_main_menu():
     # Создание списка названий страниц
     page_names = ["Task 1", "Task 2", "Info"]
 
-    # Создание меню
     with st.sidebar:
-        # Создание меню с помощью option_menu
         selected_page = option_menu(
             menu_title="Navigation",
             # menu_title=None,
@@ -401,14 +377,9 @@ def run_main_menu():
             nest_asyncio.apply()
             asyncio.run(main_task1())
         case "Task 2":
-            # st.write("Task 2")
-
-            # nest_asyncio.apply()
-            # asyncio.run(main_task2())
-
             main_task2()
-        case "Info":
-            pass
+        # case "Info":
+        #     pass
         # case _:
 
 
