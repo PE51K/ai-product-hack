@@ -6,6 +6,7 @@ import logging
 import nest_asyncio
 import tempfile
 import os
+import io
 
 from types_definition.product_info import ProductInfo
 from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
@@ -114,7 +115,9 @@ def product_input_interface():
             st.write(f"**Парт-номер производителя:** {part_number}")
             st.write(f"**Ссылки на известные ресурсы:**\n{links}")
             if characteristics_json is not None:
-                st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
+                st.write("**Характеристики товара:**")
+                st.json(characteristics)
+                # st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
             
 
             # if data_files:
@@ -166,7 +169,7 @@ def product_input_interface():
                         extracted_text = extract_text_from_pdf(temp_pdf_path)
                         data_file_content.append(extracted_text)
                         # print(extracted_text)
-                        st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
+                        # st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
                         # print("remove data files")
                         # os.remove(temp_pdf_path)
 
@@ -174,11 +177,9 @@ def product_input_interface():
                 product_brand = brand_name
                 product_name = model_name
                 loop = asyncio.get_event_loop()
-                # links = loop.run_until_complete(async_search_and_rate(product_info))
 
                 product_description = get_product_description(product_type, product_brand, product_name, characteristics, data_file_content)
-                # product_description = loop.run_until_complete(get_product_description(product_type, product_brand, product_name, characteristics, data_file_content))
-                # print("product_description  !!!", product_description)
+                print("product_description  !!!", product_description)
 
                 st.session_state["product_description"] = product_description
                 # print("product_description  !!!", st.session_state["product_description"])
@@ -205,23 +206,33 @@ def product_input_interface():
             else:
                 st.warning("Идет обработка данных, подождите.")
 
-        if st.session_state["results_ready_2t_task"] == True and st.button("Сохранить результаты задача 2"):
+        # if st.session_state["results_ready_2t_task"] == True and st.button("Сохранить результаты задача 2"):
+        if st.session_state["results_ready_2t_task"] == True:
             # Преобразуйте info_model в JSON
             json_data = json.dumps(st.session_state["summary"], indent=4)
 
+            # # Сохранение JSON в файл
+            # with open(filename, "w") as f:
+            #     f.write(json_data)
+
+            # # Отображение сообщения об успешном сохранении
+            # st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+            # Создание кнопки для скачивания файла
+            
             # Отображение имени файла для сохранения
             filename = st.text_input("Введите имя файла:", value="results_task2.json")
 
-            # Сохранение JSON в файл
-            with open(filename, "w") as f:
-                f.write(json_data)
+            # Конвертация данных в JSON строку
+            json_bytes = io.BytesIO(json_data.encode('utf-8'))
 
-            # Отображение сообщения об успешном сохранении
-            st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+            st.download_button(
+                label="Сохранить результаты задача 2",
+                data=json_bytes,
+                file_name=filename,
+                mime='application/json'
+                )
         else:
             st.warning("Идет обработка данных, подождите.")
-
-
 
 
         # if save_button:
@@ -255,7 +266,6 @@ async def main_task1():
         model_name = st.text_input("Название модели", value="CMP NS483 (Исп.2)")
         part_number = st.text_input("Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
         submit_button = st.form_submit_button("Запустить")
-
 
 
         # # Для проверки 
@@ -317,27 +327,23 @@ async def main_task1():
             else:
                 st.warning("Идет обработка данных, подождите.")
 
-            # Кнопка сохранения
+        # Кнопка сохранения
         if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
             if st.session_state["results_ready_1_task"]:
                 # Преобразуйте info_model в JSON
                 json_data = json.dumps(st.session_state["info_model"], indent=4)
 
-                # Отображение имени файла для сохранения
                 filename = st.text_input("Введите имя файла:", value="results_task1.json")
 
-                # Сохранение JSON в файл
                 with open(filename, "w") as f:
                     f.write(json_data)
 
-                # Отображение сообщения об успешном сохранении
                 st.success(f"Результаты успешно сохранены в файл '{filename}'.")
             else:
                 st.warning("Идет обработка данных, подождите.")
 
 # async def main_task2():
 def main_task2():
-    # Разделение приложения на разделы с помощью заголовков
     st.title("AI Product Hack (Кейс 4)")
     product_input_interface()
 
