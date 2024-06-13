@@ -64,8 +64,10 @@ def product_input_interface():
         data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
         # submit_button = st.form_submit_button("Запустить")
         submit_button = st.form_submit_button(label='Запустить')
-        save_button = st.form_submit_button(label='Сохранить summary в JSON')
+        save_button = st.form_submit_button(label='Сохранить итоговые данные в JSON')
         show_downloaded_files_button = st.form_submit_button(label='Показать введенные данные')
+        # Место для вывода сообщений
+        message_placeholder = st.empty()
 
 
         # if st.button('Показать введенные данные'):
@@ -186,8 +188,11 @@ def product_input_interface():
                     json.dump({"summary": st.session_state["summary"]}, json_file, indent=4)
                 
                 st.success(f"Summary успешно сохранен в {json_filename}")
+                # Вывод успешного сообщения
+                message_placeholder.success(f"Итоговые данные успешно сохранены в {json_filename}")
             else:
                 st.error("Summary еще не вычислен. Пожалуйста, введите данные и нажмите 'Показать введенные данные' перед сохранением.")
+                message_placeholder.error("Итоговые данные еще не вычислены. Пожалуйста, подождите. Убедитесь, что ввели корректные данные.")
 
 
 async def main_task1():
