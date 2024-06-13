@@ -1,6 +1,5 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-# from streamlit_upload import StreamlitUpload
 import json
 import asyncio
 import logging
@@ -33,14 +32,19 @@ logging.basicConfig(filename='app.log', level=logging.INFO)
 #     html_text="<p>This is some text from the source.</p>",
 #     pdf_texts=["Text from PDF 1", "Text from PDF 2"],
 #     source=source_link,
-)
+# )
 
+# Хранение контекста
+if "summary" not in st.session_state:
+    st.session_state["summary"] = None
 
 async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
 
 
 def product_input_interface():
+    if "summary" not in st.session_state:
+        st.session_state["summary"] = None
 
     with st.form(key='product_form'):
         
@@ -60,6 +64,7 @@ def product_input_interface():
         data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
         # submit_button = st.form_submit_button("Запустить")
         submit_button = st.form_submit_button(label='Показать введенные данные')
+        save_button = st.form_submit_button(label='Сохранить summary в JSON')
 
 
         # if st.button('Показать введенные данные'):
@@ -147,10 +152,13 @@ def product_input_interface():
                 # product_description = loop.run_until_complete(get_product_description(product_type, product_brand, product_name, characteristics, data_file_content))
                 print("product_description", product_description)
 
+                st.session_state["product_description"] = product_description
+
                 summary = get_summary_from_description(product_description)
                 print("summary", summary)
+                st.session_state["summary"] = summary
 
-                # st.session_state["info_model"] = info_model
+                
                 st.session_state["results_ready"] = True
                 st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
             except TimeoutError:
@@ -164,11 +172,21 @@ def product_input_interface():
         # Кнопка для отображения результатов
         if st.button("Показать результаты"):
             if st.session_state.get("results_ready", False):
-                pass
+                # pass
                 print(product_description)
-                # st.json(st.session_state["info_model"])
             else:
                 st.warning("Сначала выполните обработку данных.")
+
+        if save_button:
+            if "summary" in st.session_state and st.session_state["summary"] is not None:
+                # Сохранить summary в JSON файл
+                json_filename = "product_summary.json"
+                with open(json_filename, 'w') as json_file:
+                    json.dump({"summary": st.session_state["summary"]}, json_file, indent=4)
+                
+                st.success(f"Summary успешно сохранен в {json_filename}")
+            else:
+                st.error("Summary еще не вычислен. Пожалуйста, введите данные и нажмите 'Показать введенные данные' перед сохранением.")
 
 
 async def main_task1():
@@ -264,36 +282,6 @@ def run_main_menu():
             options=page_names,
             icons=["filter", "filter", "info"],
         )
-
-
-    # Стилизация CSS
-    menu_style = """
-    <style>
-        .option_menu {
-            background-color: {secondary_color};
-            text-align: center;
-            padding: 10px 0;
-        }
-
-        .option_menu .option_menu-item {
-            display: inline-block;
-            padding: 10px 15px;
-            border-radius: 5px;
-            margin: 0 10px;
-        }
-
-        .option_menu .option_menu-item a {
-            color: white;
-            text-decoration: none;
-        }
-
-        .option_menu .option_menu-item.is-selected {
-            background-color: {primary_color};
-        }
-    </style>
-    """
-    st.write(menu_style, unsafe_allow_html=True)
-
 
     match selected_page:
         case "Task 1":
