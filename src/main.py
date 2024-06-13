@@ -200,14 +200,13 @@ def product_input_interface():
 
         # Кнопка для отображения результатов
         if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
-            print("summary ", st.session_state["summary"])
+
+            # st.json(st.session_state["summary"])
+            st.text_area(f"Результаты: ", value=st.session_state["summary"], height=300)
         else:
             st.warning("Идет обработка данных, подождите.")
 
         if st.session_state["results_ready_2t_task"] == True:
-            # Преобразуйте info_model в JSON
-            # json_data = json.dumps(st.session_state["summary"], indent=4)
-            # Для более корректное отображение json фаила в редакторах
             try:
                 json_data = json.dumps(
                     st.session_state["summary"], indent=4, ensure_ascii=False)
@@ -291,8 +290,6 @@ async def main_task1():
 
                 # st.json(info_model)
 
-                # print(info_model)
-
                 st.session_state["info_model"] = info_model
                 st.session_state["results_ready_1_task"] = True
                 st.success(
@@ -331,8 +328,6 @@ async def main_task1():
             st.success(f"Результаты успешно сохранены в файл '{filename}'.")
         else:
             st.warning("Идет обработка данных, подождите.")
-
-# async def main_task2():
 
 
 def main_task2():
@@ -375,7 +370,6 @@ def run_main_menu():
 
 
 if __name__ == "__main__":
-    # main()
 
     from dotenv import load_dotenv
     load_dotenv("env/.env.yandex_search")
