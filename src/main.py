@@ -7,6 +7,7 @@ import nest_asyncio
 import tempfile
 import os
 import io
+from dotenv import load_dotenv
 
 from types_definition.product_info import ProductInfo
 from types_definition.source_links import SearchResult, SourceLink, TextInfoFromSource
@@ -383,8 +384,6 @@ def run_main_menu():
 
 
 if __name__ == "__main__":
-
-    from dotenv import load_dotenv
     load_dotenv("env/.env.yandex_search")
     load_dotenv("env/.env.api_key")
 
