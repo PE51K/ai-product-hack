@@ -37,6 +37,16 @@ logging.basicConfig(filename='app.log', level=logging.INFO)
 # Хранение контекста
 if "summary" not in st.session_state:
     st.session_state["summary"] = None
+if "results_ready_1_task" not in st.session_state:
+    st.session_state["results_ready_1_task"] = False
+if "results_ready_2t_task" not in st.session_state:
+    st.session_state["results_ready_2t_task"] = False
+if "info_model" not in st.session_state:
+    st.session_state["info_model"] = None
+
+
+
+
 
 async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
@@ -179,12 +189,13 @@ def product_input_interface():
 
                 product_description = get_product_description(product_type, product_brand, product_name, characteristics, data_file_content)
                 # product_description = loop.run_until_complete(get_product_description(product_type, product_brand, product_name, characteristics, data_file_content))
-                print("product_description", product_description)
+                # print("product_description  !!!", product_description)
 
                 st.session_state["product_description"] = product_description
+                print("product_description  !!!", st.session_state["product_description"])
 
                 summary = get_summary_from_description(product_description)
-                print("summary", summary)
+                # print("summary", summary)
                 st.session_state["summary"] = summary
 
                 
@@ -201,7 +212,7 @@ def product_input_interface():
         # Кнопка для отображения результатов
         if st.button("Показать результаты"):
             if st.session_state.get("results_ready_2t_task", False):
-                print(product_description)
+                print("summary ", st.session_state["summary"])
             else:
                 st.warning("Идет обработка данных, подождите.")
 
@@ -226,30 +237,38 @@ async def main_task1():
 
     # Раздел для ввода данных пользователем
     with st.form(key="data_input"):
-        brand_name = st.text_input("Название бренда")
-        model_name = st.text_input("Название модели")
-        part_number = st.text_input("Парт-номер производителя (опционально)")
+        # brand_name = st.text_input("Название бренда")
+        # model_name = st.text_input("Название модели")
+        # part_number = st.text_input("Парт-номер производителя (опционально)")
+        # submit_button = st.form_submit_button("Запустить")
+
+
+        brand_name = st.text_input("Название бренда", value="AQUARIUS")
+        model_name = st.text_input("Название модели", value="CMP NS483 (Исп.2)")
+        part_number = st.text_input("Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
         submit_button = st.form_submit_button("Запустить")
+
+
 
         # # Для проверки 
         # brand_name = "TCL"
         # model_name = "20 SE"
         # part_number = "T671H-2ALCRU12"
 
-        # product_info = ProductInfo(
-        #     brand_name=brand_name,
-        #     model_name=model_name,
-        #     part_number=part_number)
+        product_info = ProductInfo(
+            brand_name=brand_name,
+            model_name=model_name,
+            part_number=part_number)
 
         # product_info = ProductInfo(
         #     brand_name="ACER",
         #     model_name="CC715-91P-X7V8",
         #     part_number="NX.C5FER.001")
 
-        product_info = ProductInfo(
-            brand_name="AQUARIUS",
-            model_name="CMP NS483 (Исп.2)",
-            part_number="NS4831524116Q151E90NT2NNNN2")
+        # product_info = ProductInfo(
+        #     brand_name="AQUARIUS",
+        #     model_name="CMP NS483 (Исп.2)",
+        #     part_number="NS4831524116Q151E90NT2NNNN2")
 
     # Раздел для отображения результатов
     with st.expander("Результаты"):
@@ -259,21 +278,21 @@ async def main_task1():
                 # link = asyncio.get_event_loop().run_until_complete(search_and_rate(product_info))
                 loop = asyncio.get_event_loop()
                 links = loop.run_until_complete(async_search_and_rate(product_info))
-                print("begin get_source_links_single(link)")
+                # print("begin get_source_links_single(link)")
                 text_info = get_source_links_single(links[0])
                 # text_info = get_source_links_single(link)
-                print("finish get_source_links_single(link)")
+                # print("finish get_source_links_single(link)")
                 print("text_info ", text_info)
 
                 # info_model = generate_info_model(text_info)
                 info_model = loop.run_until_complete(get_product_characteristics_from_sources_single([text_info]))
 
-                st.json(info_model)
+                # st.json(info_model)
 
-                print(info_model)
+                # print(info_model)
 
                 st.session_state["info_model"] = info_model
-                st.session_state["results_ready"] = True
+                st.session_state["results_ready_1_task"] = True
                 st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
@@ -284,11 +303,44 @@ async def main_task1():
                 st.error(f"Ошибка: {str(e)}")
 
         # Кнопка для отображения результатов
-        if st.button("Показать результаты"):
-            if st.session_state.get("results_ready", False):
+        if st.session_state["results_ready_1_task"] == True and st.button("Показать результаты"):
+            if st.session_state["results_ready_1_task"]:
                 st.json(st.session_state["info_model"])
             else:
                 st.warning("Идет обработка данных, подождите.")
+
+            # Кнопка сохранения
+        if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
+            if st.session_state["results_ready_1_task"]:
+                # Преобразуйте info_model в JSON
+                json_data = json.dumps(st.session_state["info_model"], indent=4)
+
+                # Отображение имени файла для сохранения
+                filename = st.text_input("Введите имя файла:", value="results_task1.json")
+
+                # Сохранение JSON в файл
+                with open(filename, "w") as f:
+                    f.write(json_data)
+
+                # Отображение сообщения об успешном сохранении
+                st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+            else:
+                st.warning("Идет обработка данных, подождите.")
+    
+    # # if st.session_state["results_ready_1_task"]:
+    #     save_button_task1 = st.button("Сохранить итоговые данные в JSON")
+
+    # save_button_task1 = st.button("Сохранить итоговые данные в JSON")
+
+    # if save_button_task1 and st.session_state["info_model"] is not None:
+    #     json_filename = "task1.json"
+    #     with open(json_filename, 'w') as json_file:
+    #         json.dump({"info_mode": st.session_state["info_model"]}, json_file, indent=4)
+        
+    #     # Вывод успешного сообщения
+    #     st.success(f"Итоговые данные успешно сохранены в {json_filename}")
+    # else:
+    #     st.error("Итоговые данные еще не вычислены.")
 
 # async def main_task2():
 def main_task2():
