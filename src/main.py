@@ -205,7 +205,6 @@ def product_input_interface():
 
         # Кнопка для отображения результатов
         if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
-
             # st.json(st.session_state["summary"])
             st.text_area(f"Саммари маркетингового описания товара: ", value=st.session_state["summary"], height=300)
             st.text_area(f"Описание товара: ", value=st.session_state["product_description"], height=300)
@@ -249,11 +248,20 @@ async def main_task1():
         # part_number = st.text_input("Парт-номер производителя (опционально)")
         # submit_button = st.form_submit_button("Запустить")
 
-        brand_name = st.text_input("Название бренда", value="AQUARIUS")
+        # # 1 вариант с настройками по умолчанию для теста
+        # brand_name = st.text_input("Название бренда", value="AQUARIUS")
+        # model_name = st.text_input(
+        #     "Название модели", value="CMP NS483 (Исп.2)")
+        # part_number = st.text_input(
+        #     "Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
+        # submit_button = st.form_submit_button("Запустить")
+
+        # 2 вариант с настройками по умолчанию для теста
+        brand_name = st.text_input("Название бренда", value="Lenovo")
         model_name = st.text_input(
-            "Название модели", value="CMP NS483 (Исп.2)")
+            "Название модели", value="Lenovo IdeaPad 1 15IGL7 82V700EMUE")
         part_number = st.text_input(
-            "Парт-номер производителя (опционально)", value="NS4831524116Q151E90NT2NNNN2")
+            "Парт-номер производителя (опционально)", value="82V700EMUE")
         submit_button = st.form_submit_button("Запустить")
 
         # # Для проверки
@@ -312,11 +320,12 @@ async def main_task1():
         # Кнопка для отображения результатов
         if st.session_state["results_ready_1_task"] == True and st.button("Показать результаты"):
             st.json(st.session_state["info_model"])
+            # st.text_area(f" ", value=st.session_state["info_model"], height=300)
         else:
             st.warning("Идет обработка данных, подождите.")
 
-        # Кнопка сохранения
-        if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
+
+        if st.session_state["results_ready_1_task"] == True:
             try:
                 json_data = json.dumps(
                     st.session_state["info_model"], indent=4, ensure_ascii=False)
@@ -329,12 +338,39 @@ async def main_task1():
             filename = st.text_input(
                 "Введите имя файла:", value="results_task1.json")
 
-            with open(filename, "w") as f:
-                f.write(json_data)
+            # Конвертация данных в JSON строку
+            json_bytes = io.BytesIO(json_data.encode('utf-8'))
+
+            st.download_button(
+                label="Сохранить результаты ",
+                data=json_bytes,
+                file_name=filename,
+                mime='application/json'
+            )
 
             st.success(f"Результаты успешно сохранены в файл '{filename}'.")
-        else:
-            st.warning("Идет обработка данных, подождите.")
+
+
+        # Кнопка сохранения
+        # if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
+        #     try:
+        #         json_data = json.dumps(
+        #             st.session_state["info_model"], indent=4, ensure_ascii=False)
+        #     except Exception as e:
+        #         json_data = json.dumps(
+        #             st.session_state["info_model"], indent=4)
+        #         logging.error(f"Ошибка: {str(e)}")
+        #         st.error(f"Ошибка: {str(e)}")
+
+        #     filename = st.text_input(
+        #         "Введите имя файла:", value="results_task1.json")
+
+        #     with open(filename, "w") as f:
+        #         f.write(json_data)
+
+        #     st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+        # else:
+        #     st.warning("Идет обработка данных, подождите.")
 
 
 def main_task2():
