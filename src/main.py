@@ -206,20 +206,13 @@ def product_input_interface():
             else:
                 st.warning("Идет обработка данных, подождите.")
 
-        # if st.session_state["results_ready_2t_task"] == True and st.button("Сохранить результаты задача 2"):
         if st.session_state["results_ready_2t_task"] == True:
             # Преобразуйте info_model в JSON
-            json_data = json.dumps(st.session_state["summary"], indent=4)
-
-            # # Сохранение JSON в файл
-            # with open(filename, "w") as f:
-            #     f.write(json_data)
-
-            # # Отображение сообщения об успешном сохранении
-            # st.success(f"Результаты успешно сохранены в файл '{filename}'.")
-            # Создание кнопки для скачивания файла
+            # json_data = json.dumps(st.session_state["summary"], indent=4)
+            # Для более корректное отображение json фаила в редакторах
+            json_data = json.dumps(st.session_state["summary"], indent=4, ensure_ascii=False)
             
-            # Отображение имени файла для сохранения
+
             filename = st.text_input("Введите имя файла:", value="results_task2.json")
 
             # Конвертация данных в JSON строку
