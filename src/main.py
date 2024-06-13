@@ -63,12 +63,13 @@ def product_input_interface():
         # PDF с маркетинговыми материалами и инструкцией пользователя
         data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
         # submit_button = st.form_submit_button("Запустить")
-        submit_button = st.form_submit_button(label='Показать введенные данные')
+        submit_button = st.form_submit_button(label='Запустить')
         save_button = st.form_submit_button(label='Сохранить summary в JSON')
+        show_downloaded_files_button = st.form_submit_button(label='Показать введенные данные')
 
 
         # if st.button('Показать введенные данные'):
-        if submit_button:
+        if show_downloaded_files_button:
             if characteristics_json is not None:
                 characteristics = json.load(characteristics_json)
             else:
@@ -98,7 +99,8 @@ def product_input_interface():
                     # Отобразить содержимое текстовых файлов
                     if data_file.type == "text/plain":
                         content = data_file.read().decode("utf-8")
-                        st.text(content)
+                        # st.text(content)
+                        st.text_area(f"Содержимое txt файла {data_file.name}", value=content, height=300)
                     elif data_file.type == "application/pdf":
                         pdf_bytes = data_file.read()
                         # Создаем временный файл
@@ -159,7 +161,7 @@ def product_input_interface():
                 st.session_state["summary"] = summary
 
                 
-                st.session_state["results_ready"] = True
+                st.session_state["results_ready_2t_task"] = True
                 st.success("Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
@@ -171,11 +173,10 @@ def product_input_interface():
 
         # Кнопка для отображения результатов
         if st.button("Показать результаты"):
-            if st.session_state.get("results_ready", False):
-                # pass
+            if st.session_state.get("results_ready_2t_task", False):
                 print(product_description)
             else:
-                st.warning("Сначала выполните обработку данных.")
+                st.warning("Идет обработка данных, подождите.")
 
         if save_button:
             if "summary" in st.session_state and st.session_state["summary"] is not None:
@@ -257,7 +258,7 @@ async def main_task1():
             if st.session_state.get("results_ready", False):
                 st.json(st.session_state["info_model"])
             else:
-                st.warning("Сначала выполните обработку данных.")
+                st.warning("Идет обработка данных, подождите.")
 
 # async def main_task2():
 def main_task2():
