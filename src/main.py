@@ -21,18 +21,18 @@ from test_data import laptop_characteristics_json
 logging.basicConfig(filename='app.log', level=logging.INFO)
 
 
-product_info = ProductInfo(
-    brand_name="ACER",
-    model_name="CC715-91P-X7V8",
-    part_number="NX.C5FER.001"
-)
+# product_info = ProductInfo(
+#     brand_name="ACER",
+#     model_name="CC715-91P-X7V8",
+#     part_number="NX.C5FER.001"
+# )
 
-source_link = SourceLink(link="https://example.com", confidence_rate=0.8)
+# source_link = SourceLink(link="https://example.com", confidence_rate=0.8)
 
-text_info = TextInfoFromSource(
-    html_text="<p>This is some text from the source.</p>",
-    pdf_texts=["Text from PDF 1", "Text from PDF 2"],
-    source=source_link,
+# text_info = TextInfoFromSource(
+#     html_text="<p>This is some text from the source.</p>",
+#     pdf_texts=["Text from PDF 1", "Text from PDF 2"],
+#     source=source_link,
 )
 
 
@@ -41,9 +41,6 @@ async def async_search_and_rate(product_info):
 
 
 def product_input_interface():
-
-        # Раздел для ввода данных пользователем
-    # with st.form(key="data_input"):
 
     with st.form(key='product_form'):
         
@@ -67,7 +64,6 @@ def product_input_interface():
 
         # if st.button('Показать введенные данные'):
         if submit_button:
-            # Если загружен JSON файл, показать его содержимое
             if characteristics_json is not None:
                 characteristics = json.load(characteristics_json)
             else:
@@ -88,12 +84,6 @@ def product_input_interface():
             st.write(f"**Парт-номер производителя:** {part_number}")
             st.write(f"**Характеристики товара:**\n{json.dumps(characteristics, indent=4)}")
             st.write(f"**Ссылки на известные ресурсы:**\n{links}")
-
-        # # Вывод загруженных PDF файлов
-        # if data_files:
-        #     st.write("**Загруженные  файлы:**")
-        #     for pdf in data_files:
-        #         st.write(pdf.name)
 
         if data_files:
             try:
@@ -147,10 +137,6 @@ def product_input_interface():
                         print("remove data files")
                         os.remove(temp_pdf_path)
 
-                # if data_file_content:
-                #     print("data_file_content ", len(data_file_content))
-                #     for elem in data_file_content:
-                #         print("111111111111111",elem)
 
                 product_brand = brand_name
                 product_name = model_name
@@ -183,24 +169,6 @@ def product_input_interface():
                 # st.json(st.session_state["info_model"])
             else:
                 st.warning("Сначала выполните обработку данных.")
-
-
-
-
-
-    # # Вывод введенных данных
-    # st.write("### Введенные данные:")
-    # st.write(f"**Название бренда:** {brand_name}")
-    # st.write(f"**Модель:** {model_name}")
-    # st.write(f"**Парт-номер производителя:** {part_number}")
-    # st.write(f"**Характеристики товара:**\n{characteristics_json}")
-    # st.write(f"**Ссылки на известные ресурсы:**\n{links}")
-
-    # # Вывод загруженных PDF файлов
-    # if pdf_files:
-    #     st.write("**Загруженные PDF файлы:**")
-    #     for pdf in pdf_files:
-    #         st.write(pdf.name)
 
 
 async def main_task1():
@@ -297,12 +265,6 @@ def run_main_menu():
             icons=["filter", "filter", "info"],
         )
 
-    # if selected_page == "":
-    #     st.write("")
-    # elif selected_page == "":
-    #     st.write("")
-    # else:
-    #     st.write("")
 
     # Стилизация CSS
     menu_style = """
