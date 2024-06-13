@@ -43,8 +43,8 @@ async def async_search_and_rate(product_info):
 
 
 def product_input_interface():
-    if "summary" not in st.session_state:
-        st.session_state["summary"] = None
+    # if "summary" not in st.session_state:
+    #     st.session_state["summary"] = None
 
     with st.form(key='product_form'):
         
@@ -66,8 +66,21 @@ def product_input_interface():
         submit_button = st.form_submit_button(label='Запустить')
         save_button = st.form_submit_button(label='Сохранить итоговые данные в JSON')
         show_downloaded_files_button = st.form_submit_button(label='Показать введенные данные')
+        load_test_data_button = st.form_submit_button(label='Подгрузить тестовые данные')
         # Место для вывода сообщений
         message_placeholder = st.empty()
+
+        if load_test_data_button:
+            # Примерные данные для тестирования УДАЛИТЬ!!!
+            product_type = "ноутбук"
+            brand_name="AQUARIUS",
+            model_name="CMP NS483 (Исп.2)",
+            part_number="NS4831524116Q151E90NT2NNNN2"
+            default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+            characteristics = laptop_characteristics_json
+
+            # st.success("Тестовые данные подгружены")
+            message_placeholder.error("Тестовые данные подгружены")
 
 
         # if st.button('Показать введенные данные'):
@@ -77,13 +90,7 @@ def product_input_interface():
             else:
                 characteristics = {}
 
-            # Примерные данные для тестирования УДАЛИТЬ!!!
-            product_type = "ноутбук"
-            brand_name="AQUARIUS",
-            model_name="CMP NS483 (Исп.2)",
-            part_number="NS4831524116Q151E90NT2NNNN2"
-            default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
-            characteristics = laptop_characteristics_json
+
 
             st.write("### Введенные данные:")
             st.write(f"**Тип продукта:** {product_type}")
