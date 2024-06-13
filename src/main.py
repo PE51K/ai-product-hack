@@ -41,6 +41,12 @@ if "summary" not in st.session_state:
 async def async_search_and_rate(product_info):
     return await search_and_rate(product_info)
 
+# Значения по умолчанию
+default_product_type = "ноутбук"
+default_brand_name = "AQUARIUS"
+default_model_name = "CMP NS483 (Исп.2)"
+default_part_number = "NS4831524116Q151E90NT2NNNN2"
+default_links = "https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
 
 def product_input_interface():
     # if "summary" not in st.session_state:
@@ -48,17 +54,30 @@ def product_input_interface():
 
     with st.form(key='product_form'):
         
-        product_type = st.text_input('Тип продукта')
-        brand_name = st.text_input('Название бренда')
-        model_name = st.text_input('Модель (как она написана официальным производителем)')
-        part_number = st.text_input('Парт-номер производителя (если есть)')
+        # product_type = st.text_input('Тип продукта')
+        # brand_name = st.text_input('Название бренда')
+        # model_name = st.text_input('Модель (как она написана официальным производителем)')
+        # part_number = st.text_input('Парт-номер производителя (если есть)')
 
-        # characteristics = st.text_area('Характеристики товара в структурированном описании по инфомодели')
-        # JSON файл с характеристиками товара
+        # # JSON файл с характеристиками товара
+        # characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
+
+        # # Набор ссылок на известные ресурсы про товар в интернете
+        # links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
+
+
+        # Поля с заданными значениями по умолчанию
+        product_type = st.text_input('Тип продукта', value=default_product_type)
+        brand_name = st.text_input('Название бренда', value=default_brand_name)
+        model_name = st.text_input('Модель (как она написана официальным производителем)', value=default_model_name)
+        part_number = st.text_input('Парт-номер производителя (если есть)', value=default_part_number)
+
+        # Поле для загрузки JSON файла с характеристиками товара
         characteristics_json = st.file_uploader('Характеристики товара', type=['json'])
 
         # Набор ссылок на известные ресурсы про товар в интернете
-        links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете')
+        links = st.text_area('Набор ссылок на известные ресурсы про товар в интернете', value=default_links)
+
 
         # PDF с маркетинговыми материалами и инструкцией пользователя
         data_files = st.file_uploader('PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
@@ -66,31 +85,30 @@ def product_input_interface():
         submit_button = st.form_submit_button(label='Запустить')
         save_button = st.form_submit_button(label='Сохранить итоговые данные в JSON')
         show_downloaded_files_button = st.form_submit_button(label='Показать введенные данные')
-        load_test_data_button = st.form_submit_button(label='Подгрузить тестовые данные')
+        # load_test_data_button = st.form_submit_button(label='Подгрузить тестовые данные')
         # Место для вывода сообщений
         message_placeholder = st.empty()
 
-        if load_test_data_button:
-            # Примерные данные для тестирования УДАЛИТЬ!!!
-            product_type = "ноутбук"
-            brand_name="AQUARIUS",
-            model_name="CMP NS483 (Исп.2)",
-            part_number="NS4831524116Q151E90NT2NNNN2"
-            default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
-            characteristics = laptop_characteristics_json
+        # if load_test_data_button:
+        #     # Примерные данные для тестирования УДАЛИТЬ!!!
+        #     product_type = "ноутбук"
+        #     brand_name="AQUARIUS",
+        #     model_name="CMP NS483 (Исп.2)",
+        #     part_number="NS4831524116Q151E90NT2NNNN2"
+        #     default_links ="https://www.aq.ru/product/aquarius-cmp-ns483-isp-2/"
+        #     characteristics = laptop_characteristics_json
 
-            # st.success("Тестовые данные подгружены")
-            message_placeholder.error("Тестовые данные подгружены")
+        #     # st.success("Тестовые данные подгружены")
+        #     message_placeholder.error("Тестовые данные подгружены")
 
-
+        characteristics = {}
         # if st.button('Показать введенные данные'):
         if show_downloaded_files_button:
             if characteristics_json is not None:
+                print("characteristics_json", characteristics_json)
                 characteristics = json.load(characteristics_json)
             else:
                 characteristics = {}
-
-
 
             st.write("### Введенные данные:")
             st.write(f"**Тип продукта:** {product_type}")
@@ -117,9 +135,9 @@ def product_input_interface():
                             temp_pdf.write(pdf_bytes)
                             temp_pdf_path = temp_pdf.name
                         extracted_text = extract_text_from_pdf(temp_pdf_path)
-                        print(extracted_text)
+                        # print(extracted_text)
                         st.text_area(f"Содержимое PDF файла {data_file.name}", value=extracted_text, height=300)
-                        print("remove data files")
+                        # print("remove data files")
                         # os.remove(temp_pdf_path)
             except Exception as e:
                 logging.error(f"Ошибка загрузки фаилов: {str(e)}")
