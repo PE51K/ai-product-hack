@@ -87,7 +87,7 @@ def product_input_interface():
         data_files = st.file_uploader(
             'PDF с маркетинговыми материалами и инструкцией пользователя (если есть)', accept_multiple_files=True, type=['pdf', 'txt'])
 
-        submit_button_task2 = st.form_submit_button(label='Запустить')
+        submit_button_task2 = st.form_submit_button(label='Получить описание и саммари')
         show_downloaded_files_button_2 = st.form_submit_button(
             label='Показать введенные данные')
         # load_test_data_button = st.form_submit_button(label='Подгрузить тестовые данные')
@@ -275,7 +275,7 @@ async def main_task1():
         part_number = st.text_input(
             "Парт-номер производителя (опционально)", value="82V700EMUE")
 
-        submit_button = st.form_submit_button("Запустить")
+        submit_button = st.form_submit_button("Получить инфомодель")
 
         # # Для проверки
         # brand_name = "TCL"
@@ -298,8 +298,8 @@ async def main_task1():
         #     part_number="NS4831524116Q151E90NT2NNNN2")
 
     # Раздел для отображения результатов
-    with st.expander("Результаты"):
-        if submit_button:
+    if submit_button:
+        with st.spinner("Идет обработка данных, подождите..."):
             try:
                 # link = await search_and_rate(product_info)
                 # link = asyncio.get_event_loop().run_until_complete(search_and_rate(product_info))
@@ -316,12 +316,14 @@ async def main_task1():
                 info_model = loop.run_until_complete(
                     get_product_characteristics_from_sources_single([text_info]))
 
+                # info_model = {"dsdsd": "dsdsd"}
+
                 # st.json(info_model)
 
                 st.session_state["info_model"] = info_model
                 st.session_state["results_ready_1_task"] = True
                 st.success(
-                    "Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
+                    "Результаты успешно обработаны. Нажмите на 'Результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
                 st.error("Превышено время ожидания Yandex GPT.")
@@ -331,13 +333,11 @@ async def main_task1():
                 st.error(f"Ошибка: {str(e)}")
 
         # Кнопка для отображения результатов
-        if st.session_state["results_ready_1_task"] == True and st.button("Показать результаты"):
+    if st.session_state["results_ready_1_task"] == True:
+        with st.expander("Результаты"):
+            st.write("Полученная инфомодель:")
             st.json(st.session_state["info_model"])
-            # st.text_area(f" ", value=st.session_state["info_model"], height=300)
-        else:
-            st.warning("Идет обработка данных, подождите.")
 
-        if st.session_state["results_ready_1_task"] == True:
             try:
                 json_data = json.dumps(
                     st.session_state["info_model"], indent=4, ensure_ascii=False)
@@ -347,19 +347,22 @@ async def main_task1():
                 logging.error(f"Ошибка: {str(e)}")
                 st.error(f"Ошибка: {str(e)}")
 
+
+            st.info("Вы можете сохранить инфомодель в JSON-файл. Для этого введите имя файла и нажмите на кнопку 'Сохранить инфомодель'.")
+
             filename = st.text_input(
-                "Введите имя файла:", value="results_task1.json")
+                "Введите имя файла для сохранения:", value="results_task1.json")
 
             json_bytes = io.BytesIO(json_data.encode('utf-8'))
 
             st.download_button(
-                label="Сохранить результаты ",
+                label="Сохранить инфомодель ",
                 data=json_bytes,
                 file_name=filename,
                 mime='application/json'
             )
 
-            st.success(f"Результаты успешно сохранены в файл '{filename}'.")
+            # st.success(f"Результаты успешно сохранены в файл '{filename}'.")
 
         # Кнопка сохранения
         # if st.session_state["results_ready_1_task"] == True and st.button("Сохранить результаты"):
