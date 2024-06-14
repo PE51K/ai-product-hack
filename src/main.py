@@ -139,8 +139,8 @@ def product_input_interface():
             #         st.error(f"Ошибка: {str(e)}")
 
     # Раздел для отображения результатов
-    with st.expander("Результаты задача 2"):
-        if submit_button_task2:
+    if submit_button_task2:
+        with st.spinner('Генерация описания и саммари...'):
             try:
                 data_file_content = []
 
@@ -170,14 +170,14 @@ def product_input_interface():
 
                 product_brand = brand_name
                 product_name = model_name
-                 
+
                 try:
                     if links:
                         links_list = [link.strip() for link in links.split('\n') if link.strip()]
                         for one_link in links_list:
                             print("links", type(one_link), one_link)
                             test_source_link_html = SourceLink(
-                                link=one_link, 
+                                link=one_link,
                                 confidence_rate=1)
 
                             text_info = get_source_links_single(test_source_link_html)
@@ -207,7 +207,7 @@ def product_input_interface():
 
                 st.session_state["results_ready_2t_task"] = True
                 st.success(
-                    "Результаты успешно обработаны. Нажмите на 'Показать результаты' для отображения.")
+                    "Описание и саммари успешно сгенерированы. Нажмите на 'Результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
                 st.error("Превышено время ожидания Yandex GPT.")
@@ -216,39 +216,37 @@ def product_input_interface():
                 logging.error(f"Ошибка: {str(e)}")
                 st.error(f"Ошибка: {str(e)}")
 
-        # Кнопка для отображения результатов
-        if st.session_state["results_ready_2t_task"] == True and st.button("Показать результаты"):
+    # Кнопка для отображения результатов
+    if st.session_state["results_ready_2t_task"] == True:
+        with st.expander("Результаты"):
             # st.json(st.session_state["summary"])
-            st.text_area(f"Саммари маркетингового описания товара: ",
-                         value=st.session_state["summary"], height=300)
             st.text_area(f"Описание товара: ",
                          value=st.session_state["product_description"], height=300)
+            st.text_area(f"Саммари маркетингового описания товара: ",
+                         value=st.session_state["summary"], height=300)
 
-        else:
-            st.warning("Идет обработка данных, подождите.")
-
-        if st.session_state["results_ready_2t_task"] == True:
-            try:
-                json_data = json.dumps(
-                    st.session_state["summary"], indent=4, ensure_ascii=False)
-            except Exception as e:
-                json_data = json.dumps(st.session_state["summary"], indent=4)
-                logging.error(f"Ошибка: {str(e)}")
-                st.error(f"Ошибка: {str(e)}")
-
-            filename = st.text_input(
-                "Введите имя файла:", value="results_task2.json")
-
-            json_bytes = io.BytesIO(json_data.encode('utf-8'))
-
-            st.download_button(
-                label="Сохранить результаты задача 2",
-                data=json_bytes,
-                file_name=filename,
-                mime='application/json'
-            )
-        else:
-            st.warning("Идет обработка данных, подождите.")
+    #     try:
+    #         json_data = json.dumps(
+    #             st.session_state["summary"], indent=4, ensure_ascii=False)
+    #     except Exception as e:
+    #         json_data = json.dumps(st.session_state["summary"], indent=4)
+    #         logging.error(f"Ошибка: {str(e)}")
+    #         st.error(f"Ошибка: {str(e)}")
+    #
+    #     st.info("Вы можете скачать результаты задачи 2 в формате JSON.")
+    #     filename = st.text_input(
+    #         "Введите имя файла:", value="results_task2.json")
+    #
+    #     json_bytes = io.BytesIO(json_data.encode('utf-8'))
+    #
+    #     st.download_button(
+    #         label="Сохранить результаты задача 2",
+    #         data=json_bytes,
+    #         file_name=filename,
+    #         mime='application/json'
+    #     )
+    # else:
+    #     st.warning("Идет обработка данных, подождите.")
 
 
 async def main_task1():
@@ -323,7 +321,7 @@ async def main_task1():
                 st.session_state["info_model"] = info_model
                 st.session_state["results_ready_1_task"] = True
                 st.success(
-                    "Результаты успешно обработаны. Нажмите на 'Результаты' для отображения.")
+                    "Данные успешно обработаны. Инфомодель успешно получена. Нажмите на 'Результаты' для отображения.")
             except TimeoutError:
                 logging.error("Превышено время ожидания Yandex GPT.")
                 st.error("Превышено время ожидания Yandex GPT.")
@@ -400,22 +398,22 @@ def run_main_menu():
     secondary_color = "#6c757d"
 
     # Создание списка названий страниц
-    page_names = ["Task 1", "Task 2", "Info"]
+    page_names = ["Получение инфомодели", "Генерация описания"]
 
     with st.sidebar:
         selected_page = option_menu(
             menu_title="Navigation",
             # menu_title=None,
             options=page_names,
-            icons=["filter", "filter", "info"],
+            icons=["filter", "filter"],
         )
 
     match selected_page:
-        case "Task 1":
+        case "Получение инфомодели":
             # Enable nest_asyncio
             nest_asyncio.apply()
             asyncio.run(main_task1())
-        case "Task 2":
+        case "Генерация описания":
             main_task2()
         # case "Info":
         #     pass
