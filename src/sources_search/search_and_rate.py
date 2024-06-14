@@ -78,7 +78,16 @@ async def rate_search_results(search_results: List[SearchResult], yandex_gpt, se
     tasks = [process_message(sem, message, yandex_gpt) for message in messages]
     results = await asyncio.gather(*tasks)
 
-    return [float(result) for result in results]
+    results_float = []
+
+    for result in results:
+        try:
+            results_float.append(float(result))
+        except Exception as e:
+            print(e)
+            results_float.append(0.5)
+
+    return results_float
 
 
 async def search_and_rate(product_info: ProductInfo) -> List[SourceLink]:
