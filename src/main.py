@@ -78,10 +78,10 @@ def product_input_interface():
             'Парт-номер производителя (если есть)', value=default_part_number)
         # Поле для загрузки JSON файла с характеристиками товара
         characteristics_json = st.file_uploader(
-            'Характеристики товара', type=['json'])
+            'Характеристики товара (JSON, сгенерированный с помощью инфомодели)', type=['json'])
         # Набор ссылок на известные ресурсы про товар в интернете
         links = st.text_area(
-            'Набор ссылок на известные ресурсы про товар в интернете', value=default_links)
+            'Набор ссылок на известные ресурсы про товар в интернете (каждая ссылка с новой строки)', value=default_links)
 
         # PDF с маркетинговыми материалами и инструкцией пользователя
         data_files = st.file_uploader(
@@ -139,7 +139,7 @@ def product_input_interface():
             #         st.error(f"Ошибка: {str(e)}")
 
     # Раздел для отображения результатов
-    with st.expander("Результаты задача2"):
+    with st.expander("Результаты задача 2"):
         if submit_button_task2:
             try:
                 data_file_content = []
@@ -252,7 +252,9 @@ def product_input_interface():
 
 
 async def main_task1():
-    st.title("AI Product Hack (Кейс 4)")
+    st.title("Распознавание информодели")
+
+    st.info("Пожалуйста, введите данные для распознавания. В полях приведены данные для примера, но вы можете указать ваши собственные. Результатом обработки будет JSON-файл, который можно будет скачать.")
 
     with st.form(key="data_input"):
         # brand_name = st.text_input("Название бренда")
@@ -382,7 +384,11 @@ async def main_task1():
 
 
 def main_task2():
-    st.title("AI Product Hack (Кейс 4)")
+    st.title("Генерация текстового описания товара")
+
+    st.info(
+        "Пожалуйста, введите данные для генерации описания. В полях приведены данные для примера, но вы можете указать ваши собственные. Результатом обработки будет текстовое описание и саммари.")
+
     product_input_interface()
 
 
