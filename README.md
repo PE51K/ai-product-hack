@@ -1,149 +1,148 @@
-## Описание
+**Description**
 
-Данный репозиторий содержит прототип сервиса для распознавания товарных инфомоделей и генерации описаний и саммари на их основе. 
+This repository contains a prototype service for recognizing product “infomodels” and generating descriptions and summaries based on them.
 
-Прототип был разработан в рамках хакатона **AI Product Hack** командой **ЭЯЙ**.
+The prototype was developed during the **AI Product Hack** hackathon by the **ЭЯЙ** team.
 
-## Оглавление
+## Table of Contents
 
-* [Проблема](#Проблема)
-* [Задачи кейса](#Задачи-кейса)
-* [Функциональные возможности](#Функциональные-возможности-прототипа)
-* [Установка и настройка](#установка-и-настройка)
-* [Использование](#использование)
-* [Аналитика по задачам](#аналитика-по-задачам)
+- [Problem](#problem)
+- [Hackathon Tasks](#hackathon-tasks)
+- [Prototype Features](#prototype-features)
+- [Installation and Setup](#installation-and-setup)
+- [Usage](#usage)
+- [Task Analytics](#task-analytics)
 
-## Проблема
+## Problem
 
-Ситилинк стремиться предоставить максимальную информацию по товару (контент) для своих покупателей. 
+Сitilink aims to provide its customers with as much product information (content) as possible.
 
-Карточка товара должна содержать в себе полную информацию о товаре включая технические характеристики и маркетинговое описание товара.
+A product page must contain complete information about the item, including technical specifications and a marketing description.
 
-Ручное заполнение долгое. Генеративные технологии могут быстро, качественно заполнять карточки товара.
+Manual completion takes a long time. Generative technologies can quickly and efficiently fill in product pages.
 
-## Задачи кейса
+## Hackathon Tasks
 
-**Заполнение инфомодели**: 
-Необходимо по образцу инфомодели и названию товара составить заполненную инфомодель со всей возможной информацией.
+**Filling the infomodel**:  
+Based on a sample infomodel and product name, you need to create a filled infomodel with all possible information.
 
-**Генерация описания**:
-Необходимо по инфомодели составить грамотное продающее описание, привлекающее траффик.
+**Generating a description**:  
+Based on the infomodel, compose a compelling, traffic-driving product description.
 
-## Функциональные возможности прототипа
+## Prototype Features
 
-- Поиск и ранжирование источников информации
-- Парсинг HTML страниц и PDF внутри страниц
-- Извлечение структурированной информации в виде инфомодели
-- Выгрузка инфомодели в формате JSON
-- Генерация описания
-- Генерация саммари
+- Searching and ranking information sources
+- Parsing HTML pages and PDF files found within them
+- Extracting structured data in the form of an infomodel
+- Exporting the infomodel to JSON
+- Generating a description
+- Generating a summary
 
-## Установка и настройка
+## Installation and Setup
 
-### Требования
+### Requirements
 
-- Docker должен быть установлен на вашей машине. [Инструкция по установке Docker](https://docs.docker.com/get-docker/)
-- Git также должен быть установлен. [Инструкция по установке Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-- Вы должны получить API ключ и номер каталога в Yandex Cloud для использования YandexGPT API.
-[Инструкция по получению API ключа](https://yandex.cloud/ru/docs/foundation-models/quickstart/yandexgpt#api_1)
-- Также необходимо получить API ключ и номер каталога в Yandex Cloud для Yandex Search API. 
-[Инструкция по началу работы](https://yandex.cloud/ru/docs/search-api/quickstart);
-[Инструкция по получению API ключа](https://yandex.cloud/ru/docs/search-api/operations/auth)
+- Docker installed on your machine. [Docker installation guide](https://docs.docker.com/get-docker/)  
+- Git installed. [Git installation guide](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)  
+- You must obtain an API key and a catalog number in Yandex Cloud to use the YandexGPT API.  
+  [Instructions for obtaining an API key](https://yandex.cloud/ru/docs/foundation-models/quickstart/yandexgpt#api_1)  
+- You also need an API key and a catalog number in Yandex Cloud for the Yandex Search API.  
+  [Getting started guide](https://yandex.cloud/ru/docs/search-api/quickstart);  
+  [Instructions for obtaining an API key](https://yandex.cloud/ru/docs/search-api/operations/auth)
 
-#### Настройка окружения
-1. Скопируйте репозиторий:
-```shell
-git clone https://github.com/PE51K/ai-product-hack
-```
+#### Environment Configuration
+1. Clone the repository:
+   ```shell
+   git clone https://github.com/PE51K/ai-product-hack
+   ```
 
-2. Настройте переменные окружения:
+2. Configure environment variables:
 
-В файле [env/env.api_key](env/env.api_key) вам нужно указать:
-- YANDEX_GPT_MODEL_TYPE - тип модели: yandexgpt
-- YANDEX_GPT_CATALOG_ID - ID каталога в Yandex Cloud
-- YANDEX_GPT_API_KEY - API ключ
+   In the file [env/env.api_key](env/env.api_key), you need to specify:
+   - YANDEX_GPT_MODEL_TYPE – the model type: yandexgpt
+   - YANDEX_GPT_CATALOG_ID – Yandex Cloud catalog ID
+   - YANDEX_GPT_API_KEY – API key
 
-В файле [env/env.yandex_search](env/.env.yandex_search) вам нужно указать:
-- YANDEX_SEARCH_BASE_LINK - адрес API Yandex Search
-- YANDEX_SEARCH_FOLDER_ID - ID каталога в Yandex Cloud
-- YANDEX_SEARCH_API_KEY - API ключ
+   In the file [env/env.yandex_search](env/.env.yandex_search), you need to specify:
+   - YANDEX_SEARCH_BASE_LINK – Yandex Search API address
+   - YANDEX_SEARCH_FOLDER_ID – Yandex Cloud catalog ID
+   - YANDEX_SEARCH_API_KEY – API key
 
+#### Building the Docker Image
 
-#### Построение Docker образа
+1. Open a terminal and go to the `ai-product-hack` project directory:
+   ```shell
+   cd path/to/ai-product-hack
+   ```
 
-1. Откройте терминал и перейдите в директорию проекта `ai-product-hack`:
-    ```shell
-    cd path/to/ai-product-hack
-    ```
+2. Build the Docker image using the following command:
+   ```shell
+   docker build -t my-streamlit-app .
+   ```
 
-2. Постройте Docker образ, используя команду:
-    ```shell
-    docker build -t my-streamlit-app .
-    ```
+### Running the Docker Container
 
-### Запуск Docker контейнера
+1. Run the container using this command:
+   ```shell
+   docker run -p 8501:8501 my-streamlit-app
+   ```
 
-1. Запустите контейнер, используя команду:
-    ```shell
-    docker run -p 8501:8501 my-streamlit-app
-    ```
+Your Streamlit application is now available at `http://localhost:8501`.
 
-Теперь ваше Streamlit приложение доступно по адресу `http://localhost:8501`.
+## Key Dockerfile Commands
 
-## Основные команды в Dockerfile
+- `FROM python:3.12.2`: Uses the official Python 3.12.2 image as the base.
+- `WORKDIR /app`: Sets the working directory inside the container.
+- `COPY requirements.txt .`: Copies `requirements.txt` into the container.
+- `RUN pip install --no-cache-dir -r requirements.txt`: Installs dependencies.
+- `COPY . .`: Copies all project files into the container.
+- `EXPOSE 8501`: Opens port 8501 for access to the application.
+- `CMD ["streamlit", "run", "src/main.py"]`: Launches the Streamlit application.
 
-- `FROM python:3.12.2`: Использует официальный образ Python 3.12.2 как базовый.
-- `WORKDIR /app`: Устанавливает рабочую директорию внутри контейнера.
-- `COPY requirements.txt .`: Копирует файл `requirements.txt` в контейнер.
-- `RUN pip install --no-cache-dir -r requirements.txt`: Устанавливает зависимости.
-- `COPY . .`: Копирует все файлы проекта в контейнер.
-- `EXPOSE 8501`: Открывает порт 8501 для доступа к приложению.
-- `CMD ["streamlit", "run", "src/main.py"]`: Запускает Streamlit приложение.
+### Local Usage
 
-### Локальное использование
+1. Clone the repository:
+   ```shell
+   git clone https://github.com/PE51K/ai-product-hack
+   ```
+2. Navigate to the project directory:
+   ```shell
+   cd path/to/ai-product-hack
+   ```
+3. Install dependencies:
+   ```shell
+   pip install -r requirements.txt
+   ```
 
-1. Клонируйте репозиторий:
-    ```shell
-    git clone https://github.com/PE51K/ai-product-hack
-    ```
-2. Перейдите в директорию проекта:
-    ```shell
-    cd path/to/ai-product-hack
-    ```
-3. Установите зависимости:
-    ```shell
-    pip install -r requirements.txt
-    ```
+## Usage
+The prototype is available at `http://158.160.168.3:8501`.
 
-## Использование
-Прототип доступен по адресу `http://158.160.168.3:8501`.
+All necessary user information is available in the Streamlit prototype interface.
 
-Вся необходимая пользовательская информация доступна в интерфейсе прототипа Streamlit. 
-
-Тестовые данные для проверки работы Streamlit приложения находятся в директории [test_data](test_data).
+Test data to check the Streamlit application is located in the [test_data](test_data) directory.
 
 <br>
 
-## Аналитика по задачам
+## Task Analytics
 
-## Задача 1 "Выделение характеристик товара"
+### Task 1: “Extracting Product Specifications”
 
-Данная задача декомпозируется на 3 подзадачи:
-1) Поиск и ранжирование релевантных источников информации
-2) Парсинг текста с каждого выделенного источника
-3) Обработка полученного текста и выделение характеристик товара
+This task is divided into three subtasks:
+1. Searching and ranking relevant information sources
+2. Parsing text from each identified source
+3. Processing the extracted text and identifying product specifications
 
-### Подробнее о подзадаче 1
+#### More About Subtask 1
 
-Этап 1: получения ссылок на ресурсы. Воможные пути решения:
-1) Запрос к API поискового движка
-2) Поиск через таблицу основного ресурса и добавление к ссылке адреса на конкретный ресурс 
+Stage 1: Acquiring resource links. Possible approaches:
+1) Querying a search engine API  
+2) Searching through the main resource table and appending a specific resource URL
 
-Этап 2: Ранжирование
-1) Через таблицу
-2) Классификация через LLM
+Stage 2: Ranking
+1) Via a table
+2) Classification via LLM
 
-Формат входных данных ([TypedDict usage](https://peps.python.org/pep-0589/)):
+Input data format ([TypedDict usage](https://peps.python.org/pep-0589/)):
 ```python
 from typing import TypedDict, Optional
 
@@ -153,50 +152,49 @@ class ProductInfo(TypedDict):
     part_number: Optional[int]
 ```
 
-Формат выходных данных:
+Output data format:
 ```python
 from typing import TypedDict
 
 class SourceLink(TypedDict):
     link: str
-    confidence_rate: float # от 0 до 1
+    confidence_rate: float  # from 0 to 1
 
 def get_source_links(product_info: ProductInfo) -> list[SourceLink]:
     ...
     return [source_link_1, source_link_2, ...]
 ```
 
+#### More About Subtask 2
 
-### Подробнее о подзадаче 2
+Stage 1: Parsing. Possible outputs:
+1) Text from HTML
+2) Text from PDF found on the site
+3) Text from images on the site?
+4) Text from videos on the site?
 
-Этап 1: Парсинг. Воможные выходные данные:
-1) Текст из HTML
-2) Текст из PDF на сайте
-3) Текст из картинок на сайте?
-4) Текст из видео на сайте?
-
-Формат входных данных ([TypedDict usage](https://peps.python.org/pep-0589/)):
+Input data format ([TypedDict usage](https://peps.python.org/pep-0589/)):
 ```python
 from typing import TypedDict
 
 class SourceLink(TypedDict):
     link: str
-    confidence_rate: float # от 0 до 1
+    confidence_rate: float  # from 0 to 1
 
-curren_product_source_links: list[SourceLink] = get_source_links(...)
+current_product_source_links: list[SourceLink] = get_source_links(...)
 ```
 
-Формат выходных данных:
+Output data format:
 ```python
 from typing import TypedDict, Optional
 
 class SourceLink(TypedDict):
     link: str
-    confidence_rate: float # от 0 до 1
+    confidence_rate: float  # from 0 to 1
 
 class TextInfoFromSource(TypedDict):
     html_text: str
-    pdf_texts: Optional[list[str]] # Может быть несколько PDF на сайте (если реализуется)
+    pdf_texts: Optional[list[str]]  # There may be multiple PDFs on the site (if implemented)
     source: SourceLink
 
 def get_product_texts_from_sources(product_source_links: list[SourceLink]) -> list[TextInfoFromSource]:
@@ -204,44 +202,43 @@ def get_product_texts_from_sources(product_source_links: list[SourceLink]) -> li
     return [text_info_from_source_1, text_info_from_source_2, ...]
 ```
 
+#### More About Subtask 3
 
-### Подробнее о подзадаче 3
-
-Этап 1: извлечение конкретных характеристик из текста. Какие подходы можно применить:
-1) Языковая модель
-- Разбить текст батчи
-- Разделить инфомодели на батчи
-- Предобработка данных?
-- Постобработка выхода?
+Stage 1: Extract specific characteristics from the text. Possible approaches:
+1) Language model
+   - Split the text into batches
+   - Split the infomodel into batches
+   - Data preprocessing?
+   - Postprocessing the output?
 2) NER
 
-Этап 2: Совместить результаты с разных источников. Воможные алгоритмы:
-1) Максимум по рейтингу доверия
-2) Максимум по сумме рейтингов доверий для групп с одинаковыми значениями
+Stage 2: Combine results from different sources. Possible algorithms:
+1) Maximum by confidence rating
+2) Maximum by the sum of confidence ratings for groups with identical values
 
-Формат входных данных для этапа 1 ([TypedDict usage](https://peps.python.org/pep-0589/)):
+Input data format for Stage 1 ([TypedDict usage](https://peps.python.org/pep-0589/)):
 ```python
 from typing import TypedDict, Optional
 
 class SourceLink(TypedDict):
     link: str
-    confidence_rate: float # от 0 до 1
+    confidence_rate: float  # from 0 to 1
 
 class TextInfoFromSource(TypedDict):
     html_text: str
-    pdf_texts: Optional[list[str]] # Может быть несколько PDF на сайте (если реализуется)
+    pdf_texts: Optional[list[str]]  # There may be multiple PDFs on the site (if implemented)
     source: SourceLink
 
 current_product_texts_from_sources: list[TextInfoFromSource] = get_product_texts_from_sources(...)
 ```
 
-Формат выходных данных для этапа 1:
+Output data format for Stage 1:
 ```python
 from typing import TypedDict
 
 class TextInfoFromSource(TypedDict):
     html_text: str
-    pdf_texts: Optional[list[str]] # Может быть несколько PDF на сайте (если реализуется)
+    pdf_texts: Optional[list[str]]  # There may be multiple PDFs on the site (if implemented)
     source: SourceLink
 
 class NotebookCharacteristics(TypedDict):
@@ -254,13 +251,13 @@ def get_product_characteristics_from_sources(product_texts_from_sources: list[Te
     return [notebook_characteristics_from_source_1, notebook_characteristics_from_source_2, ...]
 ```
 
-Формат выходных данных для этапа 2:
+Output data format for Stage 2:
 ```python
 from typing import TypedDict, Union
 
 class SourceLink(TypedDict):
     link: str
-    confidence_rate: float # от 0 до 1
+    confidence_rate: float  # from 0 to 1
 
 class FinalNotebookCharacteristics(TypedDict):
     diagonal_size: float
@@ -269,19 +266,19 @@ class FinalNotebookCharacteristics(TypedDict):
 def get_final_product_characteristics(product_characteristics_from_sources: List[Union[NotebookCharacteristics, TVCharacteristics, ...]]) -> Union(FinalNotebookCharacteristics, FinalTVCharacteristics, ...):
 ```
 
-## Задача 2 "Построение описания и саммари"
+### Task 2: “Composing the Description and Summary”
 
-Воможные пути решения:
-1) Использования API GPT
-2) Локальная LLM (если важна конфиденциальность)
+Possible approaches:
+1) Using GPT API
+2) A local LLM (if confidentiality is a priority)
 
-Формат входных данных:
+Input data format:
 ```python
 from typing import TypedDict, Union
 
 class SourceLink(TypedDict):
     link: str
-    confidence_rate: float # от 0 до 1
+    confidence_rate: float  # from 0 to 1
 
 class FinalNotebookCharacteristics(TypedDict):
     diagonal_size: float
